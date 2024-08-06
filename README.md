@@ -4,7 +4,7 @@
 
 ## Objective
 
-The project phase is intended to allow you to showcase some of the skills and knowledge you have acquired over the past few weeks. You will create applications that will Extract, Transform and Load data from a prepared source into a data lake and warehouse hosted in AWS. Your solution should be reliable, resilient and (as far as possible) deployed and managed in code.
+The project phase is intended to allow you to showcase some of the skills and knowledge you have acquired over the past few weeks. You will create applications that will Extract, Transform, and Load data from a prepared source into a data lake and warehouse hosted in AWS. Your solution should be reliable, resilient, and (as far as possible) deployed and managed in code.
 
 By the end of the project, you should have:
 - written some applications in Python that interact with AWS and database infrastructure and manipulate data as required
@@ -12,7 +12,7 @@ By the end of the project, you should have:
 - demonstrated that your project is well-monitored and that you can measure its performance
 - deployed at least part of the project using scripting or automation.
 
-Your solution should showcase your knowledge of Python, SQL, database modelling, AWS, good operational practices and Agile working.
+Your solution should showcase your knowledge of Python, SQL, database modelling, AWS, good operational practices, and Agile working.
 
 ## The Minimum Viable Product (MVP)
 
@@ -34,7 +34,7 @@ The project is open-ended and could include any number of features, but **at a m
 
 All Python code should be thoroughly tested, PEP8 compliant, and tested for security vulnerabilities with the `safety` and `bandit` packages. Test coverage should exceed 90%.
 
-As much of the project as possible should be deployed automatically using infrastructure-as-code and CI/CD techniques. The deployment scripts can be written as `bash` scripts, Python code, or Terraform.
+As far as possible, the project should be deployed automatically using infrastucture-as-code and CI/CD techniques.  
 
 You should be able to demonstrate that a change to the source database will be reflected in the data warehouse **within 30 minutes at most**.
 
@@ -98,6 +98,18 @@ The structure of your "processed" S3 data should reflect these tables.
 
 Note that data types in some columns may have to be changed to conform to the warehouse data model.
 
+### History
+Your warehouse should contain a full history of all updates to _facts_. For example, if a sales order is 
+created in `totesys` and then later updated (perhaps the `units_sold` field is changed), you should have _two_ 
+records in the `fact_sales_order` table. It should be possible to see both the original and changed number
+of `units_sold`. It should be possible to query either the current state of the sale, or get a full history
+of how it has evolved (including deletion if applicable).
+
+It is _not_ necessary to do this for dimensions (which should not change very much anyway). The warehouse 
+should just have the latest version of the dimension values. However, you might want to keep a full
+record of changes to dimensions in the S3 buckets.
+
+
 ## Visualisation
 To demonstrate the use of the warehouse, you will be required to display some of the data in an application
 that can read data in real-time from the warehouse. Examples of such applications could be:
@@ -112,6 +124,14 @@ that can read data in real-time from the warehouse. Examples of such application
 
 This aspect of the project should not be tackled until the final week of the course, more details will be given then. The major focus of your efforts should be to get the data into the data warehouse.
 
+![img](./mvp.png)
+
+
+## Possible Extensions
+
+There are several ways to extend the scope of the project. 
+1. Ingest data from a file source - eg another S3 bucket. We can provide JSON files in a remote S3 bucket that can be fetched at intervals.
+1. Ingest data from an external API - eg you could retrieve relevant daily foreign exchange rates from `https://freeforexapi.com/Home/Api`. You can use the `requests` library to make the request and then save the results in S3.
 
 
 ## Technical Details
@@ -150,7 +170,7 @@ There are several ways to extend the scope of the project.
 
 ## Finally...
 
-This is a fairly realistic simulation of a typical data engineering project. In the real world, such a project would be undertaken over several weeks by a team of experienced data engineers. _It is highly unlikely that you will have time to complete a fully-functioning, "production-ready" solution._ However, you will have an opportunity to tackle lots of the typical problems faced in a real project, and put your skills in Python, data and DevOps to good use. As always, the journey is more important than the destination. 
+This is a fairly realistic simulation of a typical data engineering project. In the real world, such a project would be undertaken over several weeks by a team of experienced data engineers. _It is highly unlikely that you will have time to complete a fully-functioning, "production-ready" solution._ However, you will have an opportunity to tackle lots of the typical problems faced in a real project and put your skills in Python, data, and DevOps to good use. As always, the journey is more important than the destination. 
 
 **Above all, don't rush**: it will be better to deliver a high-quality MVP than a more complex but poorly-engineered platform. 
 
