@@ -117,9 +117,9 @@ This aspect of the project should not be tackled until the final week of the cou
 ## Technical Details
 
 To host your solution, each team will need to host your infrastructure in a single AWS account. You can use one
-of your Northcoders accounts and give each member of your team credentials to access this. However, these
-accounts are not permanent. You will probably need several attempts to deploy the infrastructure correctly, 
-so it is in your interest to ensure that you can script the creation of the resources so that they can be
+of your Northcoders accounts and give each member of your team credentials to access this. You will probably
+need to deploy the infrastructure several times before it is correct, 
+so it is in your interest to ensure that you can automate the creation of the resources so that they can be
 rebuilt as quickly and efficiently as possible.
 
 
