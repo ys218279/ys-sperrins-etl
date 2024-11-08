@@ -120,18 +120,11 @@ that can read data in real-time from the warehouse. Examples of such application
   use any other tool, you must take responsibility for setting it up yourself._ 
 - a Jupyter notebook containing graphical elements from a library such as [matplotlib](https://matplotlib.org/)
   or [Seaborn](https://seaborn.pydata.org/)
-- a [Shiny app](https://shiny.posit.co/)
+- a [Shiny app](https://shiny.posit.co/) or [Steamlit](https://streamlit.io/) front-end.
 
 This aspect of the project should not be tackled until the final week of the course, more details will be given then. The major focus of your efforts should be to get the data into the data warehouse.
 
 ![img](./mvp.png)
-
-
-## Possible Extensions
-
-There are several ways to extend the scope of the project. 
-1. Ingest data from a file source - eg another S3 bucket. We can provide JSON files in a remote S3 bucket that can be fetched at intervals.
-1. Ingest data from an external API - eg you could retrieve relevant daily foreign exchange rates from `https://freeforexapi.com/Home/Api`. You can use the `requests` library to make the request and then save the results in S3.
 
 
 ## Technical Details
@@ -149,13 +142,13 @@ You need to create:
 1. A job scheduler or orchestration process to run the ingestion job and subsequent processes. You can
 do this with AWS Eventbridge or with a combination of Eventbridge and AWS Step Functions. Since data has to be visible in the data warehouse within 30 minutes of being written to the database, you need to schedule your job to check for changes frequently.
 1. An S3 bucket that will act as a "landing zone" for ingested data.
-1. A Python application to check for changes to the database tables and ingest any new or updated data. It is **strongly** recommended that you use AWS Lambda as your computing solution. It is possible to use EC2, but it will be much harder to orchestrate, and harder to log events in Cloudwatch. The data should be saved in the "ingestion" S3 bucket in a suitable format. Status and error messages should be logged to Cloudwatch.
+1. A Python application to check for changes to the database tables and ingest any new or updated data. It is **strongly** recommended that you use AWS Lambda as your computing solution. It is possible to use other computing tools, but it will probably be _much_ harder to orchestrate, monitor and deploy. The data should be saved in the "ingestion" S3 bucket in a suitable format. Status and error messages should be logged to Cloudwatch.
 1. A Cloudwatch alert should be generated in the event of a major error - this should be sent to email.
 1. A second S3 bucket for "processed" data.
 1. A Python application to transform data landing in the "ingestion" S3 bucket and place the results in the "processed" S3 bucket. The data should be transformed to conform to the warehouse schema (see above). The job should be triggered by either an S3 event triggered when data lands in the ingestion bucket, or on a schedule. Again, status and errors should be logged to Cloudwatch, and an alert triggered if a serious error occurs.
 1. A Python application that will periodically schedule an update of the data warehouse from the data in S3. Again, status and errors should be logged to Cloudwatch, and an alert triggered if a serious error occurs.
 1. **In the final week of the course**, you should be asked to create a simple visualisation such as
-  described above. In practice, this will mean creating SQL queries to answer common business questions.
+  described above. In practice, this will mean creating SQL queries to answer common business questions. Depending on the complexity of your visualisation tool, other coding may be required too.
 
 ## Possible Extensions
 
@@ -163,10 +156,11 @@ If you have time, you can enhance the MVP. **The initial focus for any enhanceme
 of the tables in the data warehouse are being updated**. 
 
 There are several ways to extend the scope of the project. 
+1. Ingest data from an external API - eg you could retrieve relevant daily foreign exchange rates from `https://github.com/fawazahmed0/exchange-api`. You can use the `requests` library to make the request and then save the results in S3.
 1. Ingest data from a file source - eg another S3 bucket. We can provide JSON files in a remote S3 bucket that
   can be fetched at intervals.
-1. Ingest data from an external API - eg you could retrieve relevant daily foreign exchange rates from `https://github.com/fawazahmed0/exchange-api`. 
-  You can use the `requests` library to make the request and then save the results in S3.
+
+
 
 ## Finally...
 
