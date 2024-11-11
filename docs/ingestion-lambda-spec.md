@@ -26,9 +26,6 @@ prod-ingestion-bucket/address/latest.json
 ```
 
 
-
-
-
 ## Functions
 
 ```python
@@ -84,3 +81,6 @@ Options for output format considered were:
 - json lines - decided to go with this!
 - parquet
 - sql files
+
+## Logging
+The loading of each table will be logged to cloudwatch with details. Any errors will also be logged to cloudwatch.
