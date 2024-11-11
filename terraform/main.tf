@@ -12,7 +12,10 @@ provider "aws" {
   default_tags {
     tags = {
       Environment = var.environment
-      Name = "provider"
+      Project = "espresso-etl-project"
+      Team = "espresso"
+      Department = "data-engineering"
+      CostCentre = "data-engineering"
   }
 }
 }
@@ -23,7 +26,7 @@ provider "aws" {
 terraform {
   backend "s3" {
     bucket = "espresso-state-bucket"
-    key = "terraform.tfstate"
+    key = "terraform-${var.environment}.tfstate"
     region = "eu-west-2"
   }
 }
