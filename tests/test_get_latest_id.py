@@ -1,4 +1,5 @@
-from src.ingestion_utils import get_latest_id, get_table_data, write_table_data
+from src.utils.get_latest_id import get_latest_id # H&M
+
 from moto import mock_aws
 import os
 import boto3
@@ -65,11 +66,3 @@ class TestGetLatestIdFunction:
         )
 
         assert result == 1526
-
-
-class TestGetTableData:
-    pass
-
-
-class TestWriteTableData:
-    pass
