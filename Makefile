@@ -76,7 +76,7 @@ dev-setup: black coverage pip-audit bandit
 ## Run the black code check
 run-black:
 	@echo ""
-	$(call execute_in_env, black  ./src/*.py ./tests/*.py)
+	$(call execute_in_env, find . -name "*.py" -not -path "./venv/*" -exec black {} +)
 
 ## Run the unit tests
 unit-test:
