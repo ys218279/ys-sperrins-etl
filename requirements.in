@@ -1,0 +1,6 @@
+pytest
+pytest-testdox
+pytest-cov
+boto3
+moto
+pandas
