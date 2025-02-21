@@ -32,7 +32,7 @@ The project is open-ended and could include any number of features, but **at a m
 - A Python application that loads the data into a prepared data warehouse at defined intervals. Again the application should be adequately logged and monitored.
 - A visual presentation that allows users to view useful data in the warehouse (more on this below).
 
-All Python code should be thoroughly tested, PEP8 compliant, and tested for security vulnerabilities with the `safety` and `bandit` packages. Test coverage should exceed 90%.
+All Python code should be thoroughly tested, PEP8 compliant, and tested for security vulnerabilities with the `pip-audit` and `bandit` packages. Test coverage should exceed 90%.
 
 As far as possible, the project should be deployed automatically using infrastucture-as-code and CI/CD techniques.  
 
