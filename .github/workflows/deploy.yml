@@ -2,9 +2,7 @@ name: team-09-sperrins
 
 on:
   push:
-    branches:
   pull_request:
-
 
 
 jobs:
