@@ -2,7 +2,6 @@
 **/.DS_Store
 temp/
 .DS_Store
-serverless-output.yaml
 **/.vscode/
 **/build/
 **/dist/
@@ -13,6 +12,5 @@ serverless-output.yaml
 **/*pycache
 *coverage*
 venv/
-**/.terraform*
 *.tfstate*
 .pytest*
