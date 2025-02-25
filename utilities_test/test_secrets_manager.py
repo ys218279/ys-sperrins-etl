@@ -6,7 +6,7 @@ from moto import mock_aws
 import io
 import os
 
-@pytest.fixture
+@pytest.fixture(scope="module", autouse=True)
 def aws_credentials():
     os.environ["AWS_ACCESS_KEY_ID"] = "testing"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
