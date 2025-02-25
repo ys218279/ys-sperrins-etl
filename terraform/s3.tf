@@ -5,7 +5,7 @@ resource "aws_s3_bucket" "ingestion_bucket" {
     Service = "s3"
     Environment = "dev"  
   }
-}
+} 
 
 #======================================================================
 # this will be the naming scheme for bucket definintions moving forward
