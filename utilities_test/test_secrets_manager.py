@@ -91,7 +91,7 @@ class TestRetrieval:
                         "password": 'Pa55word',
                         "host": 'host',
                         "database": 'database',
-                        "get_port": 'port'}
+                        "port": 'port'}
 
 
     @patch("builtins.input")

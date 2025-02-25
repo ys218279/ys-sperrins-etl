@@ -13,7 +13,7 @@ def entry(client):
                         "password": get_password,
                         "host": get_host,
                         "database": get_database,
-                        "get_port": get_port}
+                        "port": get_port}
         secret_string = json.dumps(secret_value)
         try:
             client.create_secret(Name=secret_identifier, SecretString=secret_string)
@@ -41,5 +41,3 @@ def retrieval(client):
             print({"ERROR": err, "massage": "Fail to connect to aws secret manager!"})
     else:
         print("invalid client type used for secret manager! plz contact developer!")
-
-
