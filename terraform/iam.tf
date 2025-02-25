@@ -81,7 +81,7 @@ data "aws_iam_policy_document" "ingestion_s3_policy" {
 resource "aws_iam_policy" "s3_policy" {
     name_prefix = "s3-policy-${var.ingestion_lambda}-write"
     
-    policy = data.aws_iam_policy_document.ingestion_lambda_role.json
+    policy = data.aws_iam_policy_document.ingestion_s3_policy.json
   
 }
 
