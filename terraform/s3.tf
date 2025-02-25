@@ -1,10 +1,10 @@
 resource "aws_s3_bucket" "ingestion_bucket" {
-  bucket_prefix = var.bucket_prefix_name
+  bucket_prefix = var.ingestion_bucket_prefix
   tags = {
     bucket_type = "ingestion"
     Service = "s3"
-    Environment = "dev"  
-  }
+    Environment = var.Environment  
+    }
 } 
 
 #======================================================================
