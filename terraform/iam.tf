@@ -70,9 +70,17 @@ data "aws_iam_policy_document" "ingestion_s3_policy" {
   }
 }
 
+/*
+# ------------------------------
+# Lambda IAM Policy for S3-ingestion
+# ------------------------------
+*/
+
+
 # policy for s3 ingestion bucket
 resource "aws_iam_policy" "s3_policy" {
-    name = "s3_policy"
+    name_prefix = "s3-policy-${var.ingestion_lambda}-write"
+    
     policy = data.aws_iam_policy_document.ingestion_lambda_role.json
   
 }
@@ -85,7 +93,7 @@ resource "aws_iam_policy_attachment" "lambda_s3_policy_attachment" {
 }
 
 
-### cloudwatch policy
+
 /*
 # ------------------------------
 # Lambda IAM Policy for CloudWatch
@@ -122,7 +130,7 @@ data "aws_iam_policy_document" "cw_document" {
 # Create policy with policy document defined above
 resource "aws_iam_policy" "cloudwatch_policy" {
   
-  name = "cloudwatch_policy"
+  name_prefix = "cloudwatch-policy-${var.ingestion_lambda}-logging"
   policy = data.aws_iam_policy_document.cw_document.json
 }
 
