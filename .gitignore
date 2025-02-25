@@ -12,7 +12,9 @@ temp/
 **/*pycache
 *coverage*
 venv/
-*.tfstate*
+**.tfstate*
 .pytest*
 .env
 terraform/.terraform**/** 
+
+
