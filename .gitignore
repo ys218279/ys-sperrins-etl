@@ -16,3 +16,4 @@ venv/
 .pytest*
 .env
 .terraform
+**.tfstate.*
