@@ -1,6 +1,8 @@
-from utilities.test_secrets_manager import entry, password_retrieval
+from utilities.secrets_manager import entry, password_retrieval
 import pytest
 import boto3
+from unittest.mock import patch
+from moto import mock_aws
 
 def input_args():
     yield "Missile_Launch_Codes"

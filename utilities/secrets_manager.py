@@ -9,9 +9,9 @@ def entry(client):
         secret_identifier = "de_2024_12_02"
         get_username = input('Please enter your username: ')
         get_password = maskpass.askpass(prompt="Please enter your password: ", mask="#")
-        get_host = maskpass.askpass(prompt="Please enter your host: ", mask="#")
-        get_database = maskpass.askpass(prompt="Please enter your database: ", mask="#")
-        get_port = maskpass.askpass(prompt="Please enter your port: ", mask="#")
+        get_host = input("Please enter your host: ")
+        get_database = input("Please enter your database: ")
+        get_port = input("Please enter your port: ")
         secret_value = {"username": get_username,
                         "password": get_password,
                         "host": get_host,
