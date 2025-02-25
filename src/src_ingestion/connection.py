@@ -9,10 +9,10 @@ load_dotenv(override=True)
 def connect_to_db():
     # credentials=retrieve()
     return pg8000.native.Connection(
-        user=os.getenv("RDS_USER"), 
+        user=os.getenv("RDS_USER"),
         password=os.getenv("RDS_PASSWORD"),
         database=os.getenv("RDS_DATABASE"),
-        host=os.getenv("RDS_HOST")
+        host=os.getenv("RDS_HOST"),
     )
 
 
