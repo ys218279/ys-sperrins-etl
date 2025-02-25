@@ -28,7 +28,7 @@ def entry(client):
         print("invalid client type used for secret manager! plz contact developer!")
 
 #This is the retrieval function which accesses the secret storing the totesys DB credentials as a dictionary
-#This function can be used multiple times whenever user needs DB credentials
+#This function can be used multiple times whenever user needs DB credentials in lambda
 def retrieval(client):
     if "SecretsManager" in str(type(client)):
         secret_identifier = "de_2024_12_02"
