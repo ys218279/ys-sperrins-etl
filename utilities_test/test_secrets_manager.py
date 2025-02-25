@@ -1,16 +1,30 @@
-from utilities.secrets_manager import entry, password_retrieval
+from utilities.secrets_manager import entry, retrieval
 import pytest
 import boto3
 from unittest.mock import patch
 from moto import mock_aws
+import io
 
 def input_args():
-    yield "Missile_Launch_Codes"
     yield "bidenj"
     yield "Pa55word"
-    yield "Missile_Launch_Codes"
+    yield "host"
+    yield "database"
+    yield "port"
     yield "bidenj"
     yield "Pa55word"
+    yield "host"
+    yield "database"
+    yield "port"
+
+def input_args_2():
+    yield "bidenj"
+    yield "Pa55word"
+    yield "host"
+    yield "database"
+    yield "port"
+    yield "abc"
+
 class TestUtilsEntry:
     @patch("builtins.input", side_effect=input_args())
     def test_entry_successful(self, mock_input):
@@ -20,6 +34,7 @@ class TestUtilsEntry:
                 entry(client)
                 result = fake_out.getvalue()
                 assert "Secret saved." in result
+
     @patch("builtins.input", side_effect=input_args())
     def test_entry_fails(self, mock_input):
         with mock_aws():
@@ -31,6 +46,7 @@ class TestUtilsEntry:
                     "invalid client type used for secret manager! plz contact developer!"
                     in result
                 )
+
     @patch("builtins.input", side_effect=input_args())
     def test_entry_successfully_stored(self, mock_input):
         with mock_aws():
@@ -38,6 +54,7 @@ class TestUtilsEntry:
             entry(client)
             response = client.list_secrets()
             assert len(response["SecretList"]) == 1
+
     @patch("builtins.input", side_effect=input_args())
     def test_secret_already_exists(self, mock_input):
         with mock_aws():
@@ -49,20 +66,42 @@ class TestUtilsEntry:
                 assert "Secret already exists!" in result
 
 
+class TestRetrieval:
+
+    @patch("builtins.input", side_effect=input_args())
+    def test_retrieval_successful_1_secret(self, mock_input):
+        with mock_aws():
+            client = boto3.client("secretsmanager")
+            with patch("sys.stdout", new=io.StringIO()) as fake_out:
+                entry(client)
+                retrieval(client)
+                mock_input.input_args = ["de_2024_12_02"]
+                result = fake_out.getvalue()
+                assert "Secrets returned as dictionary" in result
+
+    @patch("builtins.input", side_effect=input_args())
+    def test_retrieval_successful_return_dict(self, mock_input):
+        with mock_aws():
+            client = boto3.client("secretsmanager")
+            with patch("sys.stdout", new=io.StringIO()) as fake_out:
+                entry(client)
+                res = retrieval(client)
+                mock_input.input_args = ["de_2024_12_02"]
+                assert res == {"username": 'bidenj',
+                        "password": 'Pa55word',
+                        "host": 'host',
+                        "database": 'database',
+                        "get_port": 'port'}
 
 
-
-
-
-
-def test_password_retrieval_retrieves_id_and_save_credentials_to_file():
-    client = boto3.client('secretsmanager')
-    result = password_retrieval(client)
-    file_name = 'secrets.txt'
-    assert result == f'secrets stored in {file_name}' 
-
-def test_password_retrieval_shows_error_message_if_id_not_exist():
-    client = boto3.client('secretsmanager')
-    result = password_retrieval(client)
-    
-    assert result == 'Secret not found' 
+    @patch("builtins.input")
+    def test_retrieval_secret_doesnot_exist(self, mock_input):
+        with mock_aws():
+            client = boto3.client("secretsmanager")
+            with patch("sys.stdout", new=io.StringIO()) as fake_out:
+                retrieval(client)
+                result = fake_out.getvalue()
+                assert (
+                    "An error occurred (ResourceNotFoundException) when calling the GetSecretValue operation"
+                    in result
+                )
