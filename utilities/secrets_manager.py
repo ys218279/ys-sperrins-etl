@@ -1,6 +1,8 @@
 import boto3
 import json
 
+
+#This is the entry function which will only be used once to create the initial secret that will store the totesys DB credentials
 def entry(client):
     if "SecretsManager" in str(type(client)):
         secret_identifier = "de_2024_12_02"
@@ -25,7 +27,8 @@ def entry(client):
     else:
         print("invalid client type used for secret manager! plz contact developer!")
 
-
+#This is the retrieval function which accesses the secret storing the totesys DB credentials as a dictionary
+#This function can be used multiple times whenever user needs DB credentials
 def retrieval(client):
     if "SecretsManager" in str(type(client)):
         secret_identifier = "de_2024_12_02"
