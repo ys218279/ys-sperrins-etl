@@ -55,9 +55,6 @@ def lambda_handler(event, context):
                         response = s3_client.upload_file(f'{filename}.json', BUCKET_NAME, object_name)
                         return True      
                     except ClientError as e:
-
-                        print("\n \n\n")
-                        print("table_name>>>>", e)
                         return False
                     finally:
                         dir=os.getcwd()
