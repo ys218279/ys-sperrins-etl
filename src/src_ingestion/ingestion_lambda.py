@@ -22,8 +22,6 @@ def lambda_handler(event, context):
     conn = connect_to_db()
     raw_table_list =conn.run("SELECT * from information_schema.tables")
     table_list = [item[2] for item in raw_table_list if item[1] == 'public']    
-    
     for table_name in table_list:
         raw_data = conn.run(f"SELECT * FROM {identifier(table_name)}")
         # implement formatting here.
-
