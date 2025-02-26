@@ -135,8 +135,20 @@ resource "aws_iam_policy" "cloudwatch_policy" {
 }
 
 # Attach the cw policy to the lambda role
-resource "aws_iam_role_policy_attachment" "lambda_cw_policy_attachment" {
+resource "aws_iam_role_policy_attachment" "ingestion_lambda_cw_policy_attachment" {
   
   policy_arn = aws_iam_policy.cloudwatch_policy.arn
   role = aws_iam_role.ingestion_lambda_role.name
+}
+
+resource "aws_iam_role_policy_attachment" "transform_lambda_cw_policy_attachment" {
+  
+  policy_arn = aws_iam_policy.cloudwatch_policy.arn
+  role = aws_iam_role.transform_lambda_role.name
+}
+
+resource "aws_iam_role_policy_attachment" "load_lambda_cw_policy_attachment" {
+  
+  policy_arn = aws_iam_policy.cloudwatch_policy.arn
+  role = aws_iam_role.load_lambda_role.name
 }

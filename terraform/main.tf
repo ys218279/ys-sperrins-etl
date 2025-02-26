@@ -11,7 +11,7 @@ terraform {
     backend "s3"{
     #test bucket name format should be:
     # <Your name>-sperrins-data-bucket
-    bucket = "sperrins-data-bucket"
+    bucket = "sperrins-data-bucket-2"
     key = "tf_state/project_sperrins.tfstate"
     region = "eu-west-2"
     }

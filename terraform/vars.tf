@@ -22,3 +22,8 @@ variable "python_runtime" {
   type    = string
   default = "python3.12"
 }
+
+variable "default_timeout" {
+  type    = number
+  default = 5
+}
