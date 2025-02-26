@@ -82,6 +82,16 @@ def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
 # periodically checks for new and updated data
 # if the column 'last_updated' is newer than the last pull of data,
 # then new data is grabbed/reformatted/written to ingestion bucket
-    #       - use name to save times of last fetch
-    #       - compare "last_updated" column in each table to see if any values are greater than the last fetch
+
+import boto3
+import os
+from pg8000.native import Connection
+from src_ingestion.connection import connect_to_db, close_db_connection
+
+BUCKET_NAME = os.environ["S3_BUCKET_NAME"]
+
+def lambda_handler(event, context):
+
+
+
 
