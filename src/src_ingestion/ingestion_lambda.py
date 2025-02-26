@@ -1,8 +1,7 @@
-
 # this lambda will initially connect to the db
-# then it will read all the data from the specified tables 
+# then it will read all the data from the specified tables
 # the first time it will select all from the tables, with conn.run('query)
-# this then need to be reformatted 
+# this then need to be reformatted
 # then it will be written to the the ingestion s3 bucket
 # using datatime year/month/day/timestamp.parquet
 
@@ -17,8 +16,6 @@ from src_ingestion.connection import connect_to_db, close_db_connection
 
 BUCKET_NAME = os.environ["S3_BUCKET_NAME"]
 
+
 def lambda_handler(event, context):
-
-
-
-
+    pass
