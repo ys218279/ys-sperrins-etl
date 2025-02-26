@@ -74,6 +74,11 @@ resource "aws_lambda_function" "ingestion_lambda" {
   timeout          = var.default_timeout
   layers           = [aws_lambda_layer_version.lambda_layer.arn]
   depends_on       = [aws_s3_object.lambda_code, aws_s3_object.layer_code]
+  environment {
+    variables = {
+      S3_BUCKET_NAME = aws_s3_bucket.ingestion_bucket.id
+    }
+  }
 }
 
 resource "aws_lambda_function" "transform_lambda" {
