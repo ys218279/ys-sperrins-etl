@@ -1,18 +1,19 @@
-import os
-from dotenv import load_dotenv
+from utilities.secrets_manager import retrieval, entry
 import pg8000.native
 
 
-load_dotenv(override=True)
+def connect_to_db(client):
+    credentials=retrieval(client)
 
+    if credentials is None:
+        entry(client)
+        credentials = retrieval(client)
 
-def connect_to_db():
-    # credentials=retrieve()
     return pg8000.native.Connection(
-        user=os.getenv("RDS_USER"),
-        password=os.getenv("RDS_PASSWORD"),
-        database=os.getenv("RDS_DATABASE"),
-        host=os.getenv("RDS_HOST"),
+        user=credentials['username'],
+        password=credentials['password'],
+        database=credentials['database'],
+        host=credentials['host']
     )
 
 
