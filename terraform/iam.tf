@@ -235,26 +235,7 @@ data "aws_iam_policy_document" "ingestion_lambda_secret_manager" {
     effect = "Allow"
     actions = [
       "secretsmanager:*",
-      "cloudformation:CreateChangeSet",
-      "cloudformation:DescribeChangeSet",
-      "cloudformation:DescribeStackResource",
-      "cloudformation:DescribeStacks",
-      "cloudformation:ExecuteChangeSet",
-      "docdb-elastic:GetCluster",
-      "docdb-elastic:ListClusters",
-      "ec2:DescribeSecurityGroups",
-      "ec2:DescribeSubnets",
-      "ec2:DescribeVpcs",
-      "kms:DescribeKey",
-      "kms:ListAliases",
-      "kms:ListKeys",
       "lambda:ListFunctions",
-      "rds:DescribeDBClusters",
-      "rds:DescribeDBInstances",
-      "redshift:DescribeClusters",
-      "redshift-serverless:ListWorkgroups",
-      "redshift-serverless:GetNamespace",
-      "tag:GetResources"
     ]
     resources = ["*"]
   }
