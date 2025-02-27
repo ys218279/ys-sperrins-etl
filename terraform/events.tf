@@ -5,17 +5,18 @@
 # the payload from lambda 1 is passed to lambda 2 as payload, triggering lambda 2
 
 resource "aws_sfn_state_machine" "pipeline_state_machine" {
-  name     = "My-pipeline-statemachine-terraform-generated"
+  name     = var.state_machine
   role_arn = aws_iam_role.state_machine_role.arn
   definition = templatefile("${path.module}/mystatemachine.asl.json", {
     ProcessingLambda = "arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${var.ingestion_lambda}:$LATEST"
     } 
   )
+  depends_on = [ aws_lambda_function.ingestion_lambda ]
 }
 
 
 resource "aws_scheduler_schedule" "step_function_eventbridge" {
-  name = "invoke-step-function-eventbridge"
+  name = var.eventbridge_scheduler
   flexible_time_window {
     mode = "OFF"
   }

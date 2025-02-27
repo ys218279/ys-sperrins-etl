@@ -348,7 +348,7 @@ data "aws_iam_policy_document" "eventbridge_document_execution" {
     actions = ["states:StartExecution"]
     effect  = "Allow"
     resources = [
-      "arn:aws:states:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:stateMachine:My-pipeline-statemachine-terraform-generated"
+      "arn:aws:states:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:stateMachine:${var.state_machine}"
     ]
   }
 }

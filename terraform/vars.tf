@@ -30,9 +30,14 @@ variable "load_lambda" {
   default = "load_lambda"
 }
 
-variable "state_machine_scheduler" {
+variable "state_machine" {
   type    = string
-  default = "state_machine_scheduler"
+  default = "pipeline_state_machine"
+}
+
+variable "eventbridge_scheduler" {
+  type    = string
+  default = "eventbridge_scheduler"
 }
 
 variable "python_runtime" {
@@ -44,3 +49,4 @@ variable "default_timeout" {
   type    = number
   default = 20
 }
+
