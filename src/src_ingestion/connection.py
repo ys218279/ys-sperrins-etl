@@ -1,4 +1,4 @@
-from utilities.secrets_manager import retrieval, entry
+from src.src_ingestion.secrets_manager import retrieval, entry
 import pg8000.native
 
 
