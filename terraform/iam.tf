@@ -220,3 +220,52 @@ resource "aws_iam_role_policy_attachment" "load_lambda_cw_policy_attachment" {
   policy_arn = aws_iam_policy.cloudwatch_policy_load.arn
   role       = aws_iam_role.load_lambda_role.name
 }
+
+
+/*
+# ------------------------------
+# Lambda IAM Policy for Secret Manager
+# ------------------------------
+*/
+
+#ingestion lambda policy document for secret manager
+data "aws_iam_policy_document" "ingestion_lambda_secret_manager" {
+  statement {
+    sid    = "BasePermissions"
+    effect = "Allow"
+    actions = [
+      "secretsmanager:*",
+      "lambda:ListFunctions",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "LambdaPermissions"
+    effect = "Allow"
+    actions = [
+      "lambda:AddPermission",
+      "lambda:CreateFunction",
+      "lambda:GetFunction",
+      "lambda:InvokeFunction",
+      "lambda:UpdateFunctionConfiguration"
+    ]
+    resources = ["arn:aws:lambda:*:*:function:SecretsManager*"]
+  }
+}
+
+
+# policy for secret manager
+resource "aws_iam_policy" "secret_manager_policy" {
+  name_prefix = "secret_manager-policy-${var.ingestion_lambda}"
+
+  policy = data.aws_iam_policy_document.ingestion_lambda_secret_manager.json
+
+}
+
+# policy attachment to the role "iam_role_for_lambda"
+resource "aws_iam_policy_attachment" "lambda_secret_manager_policy_attachment" {
+  name       = "lambda-secret-manager-attachment"
+  roles      = [aws_iam_role.ingestion_lambda_role.name]
+  policy_arn = aws_iam_policy.secret_manager_policy.arn
+}
