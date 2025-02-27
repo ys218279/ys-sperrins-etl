@@ -56,7 +56,12 @@ data "aws_iam_policy_document" "ingestion_s3_policy" {
   statement {
     sid = "1"
 
-    actions   = ["s3:PutObject"]
+    actions   = ["s3:PutObject", 
+                "s3:Get*",
+                "s3:List*",
+                "s3:Describe*",
+                "s3-object-lambda:Get*",
+                "s3-object-lambda:List*"]
     resources = ["${aws_s3_bucket.ingestion_bucket.arn}/*"]
   }
 }

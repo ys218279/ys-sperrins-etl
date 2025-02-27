@@ -1,4 +1,3 @@
-
 # eventbridge scheduler trigggers/invokes the stepfunction every 5(?) minutes
 # the stepfunction invokes the first lambda (no payload entering?)
 # the lambda runs and dumps to s3 (exit payload success message?)
