@@ -70,11 +70,8 @@ data "aws_iam_policy_document" "ingestion_s3_policy" {
                 "s3:List*",
                 "s3:Describe*",
                 "s3-object-lambda:Get*",
-                "s3-object-lambda:List*",
-                "s3:*",
-                "s3-object-lambda:*",
-                "s3:ListBucket"]
-    resources = ["${aws_s3_bucket.ingestion_bucket.arn}/*"]
+                "s3-object-lambda:List*"]
+    resources = ["${aws_s3_bucket.ingestion_bucket.arn}"]
   }
 }
 
