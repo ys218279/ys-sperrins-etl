@@ -51,6 +51,6 @@ jobs:
       - name: Terraform format
         working-directory: terraform
         run: terraform fmt
-      - name: Terraform apply -var="email_address=${{ secrets.EMAIL_SUBSCRIBED_TO_SNS }}"
+      - name: Terraform apply 
         working-directory: terraform 
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -var="email_address=${{ secrets.EMAIL_SUBSCRIBED_TO_SNS }}"
