@@ -1,15 +1,15 @@
-from src.src_ingestion.secrets_manager import retrieval, entry
-import pg8000.native
+from secrets_manager import retrieval, entry
+from pg8000.native import Connection
 
 
 def connect_to_db(client):
-    credentials=retrieval(client)
+    credentials = retrieval(client)
 
-    if credentials is None:
+    if not credentials:
         entry(client)
         credentials = retrieval(client)
 
-    return pg8000.native.Connection(
+    return Connection(
         user=credentials['username'],
         password=credentials['password'],
         database=credentials['database'],
