@@ -17,14 +17,12 @@ Important Notes:
 
 '''
 
-import boto3
-from botocore.exceptions import ClientError
 import os
-import json
 from datetime import datetime
 from pg8000.native import identifier
 from connection import connect_to_db, close_db_connection
 from pprint import pprint
+from utils import list_s3_objects, upload_to_s3
 
 BUCKET_NAME = os.environ["S3_BUCKET_NAME"]
 
@@ -35,22 +33,8 @@ BUCKET_NAME = os.environ["S3_BUCKET_NAME"]
     # list_of_files = [response['Contents'][i]['Key'] for i in range(len(response['Contents']))]
 
 def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
-    try:
-        client = boto3.client("secretsmanager")
-    except ClientError as e:
-        return f'failed to connect to secret manager, got error: {e}'
-    
-    try:
-        conn = connect_to_db(client)
-    except Exception as e:
-        return f'failed to connect to db, got error: {e}'
-
-    try:
-        s3_client = boto3.client('s3')
-    except ClientError as e:
-        return f'failed to connect to s3, got error: {e}'
-    
-    response = s3_client.list_objects_v2(Bucket=BUCKET_NAME)
+    conn = connect_to_db()
+    response = list_s3_objects(BUCKET_NAME)
     if 'Contents' not in response:
         raw_table_list =conn.run("SELECT * from information_schema.tables")
         table_list = [item[2] for item in raw_table_list if item[1] == 'public'][1:]
@@ -59,21 +43,8 @@ def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
             columns = [col['name'] for col in conn.columns]
             result = {"columns" : columns, "data" : raw_data}
             filename = datetime.now().strftime('%H%M%S')
-            tmp_file_path = f'/tmp/{table}.csv'
-            with open(tmp_file_path,'w') as f:
-                filedatain = json.dumps(result, indent=4, sort_keys=True, default=str)
-                res_bytes = filedatain.encode('utf-8')
-            y_m_d=datetime.now().strftime('%Y-%m-%d')
-            object_name=f"{table}/{y_m_d}/{filename}.json"
-            s3_client.put_object(Body=res_bytes, Bucket=BUCKET_NAME, Key=object_name)
-        return {"base_time" : filename, "new_data" : False}
-    else:
-        list_of_files = [response['Contents'][i]['Key'] for i in range(len(response['Contents']))]
-        latest_filename=list_of_files[-1]
-        latest_fetchtime=latest_filename[-22:-5]
-        return {"base_time" : latest_fetchtime, "new_data" : False}
-    
-
+            upload_to_s3(BUCKET_NAME, table, result)
+        return {"base_time": filename, "new_data": False}
             
             
 #         try:
