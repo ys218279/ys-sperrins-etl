@@ -30,9 +30,14 @@ variable "load_lambda" {
   default = "load_lambda"
 }
 
-variable "state_machine_scheduler" {
+variable "state_machine" {
   type    = string
-  default = "state_machine_scheduler"
+  default = "pipeline_state_machine"
+}
+
+variable "eventbridge_scheduler" {
+  type    = string
+  default = "eventbridge_scheduler"
 }
 
 variable "python_runtime" {
@@ -45,6 +50,7 @@ variable "default_timeout" {
   default = 20
 }
 
+<<<<<<< HEAD
 
 variable "lambda_ingestion_topic_name" {
   description = "Value of the Name tag for the lambda_Ingestion_topic_name"
@@ -57,3 +63,5 @@ variable "email_address" {
   //we are using a fake temp email service to set as a defualt email until we have one made for the project
   type        = string
 }
+=======
+>>>>>>> c75e07bbf67a6cd8118e22f644d60c47e1d66c89
