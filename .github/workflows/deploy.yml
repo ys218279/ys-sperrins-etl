@@ -45,11 +45,11 @@ jobs:
       # terraform plan
       - name: Terraform plan 
         working-directory: terraform
-        run: terraform plan
+        run: terraform plan -var="email_address=${{ secrets.EMAIL_SUBSCRIBED_TO_SNS }}"
       # terraform fmt
       - name: Terraform format
         working-directory: terraform
         run: terraform fmt
-      - name: Terraform apply
+      - name: Terraform apply -var="email_address=${{ secrets.EMAIL_SUBSCRIBED_TO_SNS }}"
         working-directory: terraform 
         run: terraform apply -auto-approve
