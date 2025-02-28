@@ -9,7 +9,7 @@ temp/
 **/*.pyc
 **/.vscode
 **/*_cache
-**/*pycache
+**/*pycache*
 *coverage*
 venv/
 **.tfstate*

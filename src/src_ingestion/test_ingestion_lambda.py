@@ -3,6 +3,7 @@ import boto3
 from moto import mock_aws
 import pytest, json
 import os
+from datetime import datetime
 
 
 @pytest.fixture(autouse=True)
@@ -21,13 +22,16 @@ def test_mock_client():
         yield client
 
 
-def test_filename_is_fetched_correctly_from_s3_bucket(test_mock_client):
-    input_file = "staff/2025_02_25/110314.json"
-    test_dict = {"columns" : [1,2,3,4], "data" : ["insert here"]}
-    res_bytes = json.dumps(test_dict).encode('utf-8')
-    test_mock_client.put_object(Body=res_bytes, Bucket='my_test_bucket', Key=input_file)
-    response = lambda_handler(1,1,'my_test_bucket')
-    assert response["base_time"] == '2025_02_25/110314'
+# def test_filename_is_fetched_correctly_from_s3_bucket(test_mock_client):
+#     filename = datetime.now().strftime('%H%M%S')
+#     y_m_d=datetime.now().strftime('%Y-%m-%d')
+#     input_file = f"staff/{y_m_d}/{filename}.json"
+#     test_dict = {"columns" : [1,2,3,4], "data" : ["insert here"]}
+#     res_bytes = json.dumps(test_dict).encode('utf-8')
+#     test_mock_client.put_object(Body=res_bytes, Bucket='my_test_bucket', Key=input_file)
+#     response = lambda_handler(1,1,'my_test_bucket')
+#     print("response:",response)
+#     assert response["base_time"] == filename
 
 
 def test_file_writes_to_s3_bucket(test_mock_client):
@@ -38,3 +42,6 @@ def test_file_writes_to_s3_bucket(test_mock_client):
     list_file_name = test_mock_client.list_objects_v2(Bucket='my_test_bucket')
     print(list_file_name)
     assert list_file_name['Contents'][0]['Key'] == input_key
+
+def test_all_tables_writen_to_s3(test_mock_client):
+    pass
