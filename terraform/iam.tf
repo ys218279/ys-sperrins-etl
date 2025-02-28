@@ -15,18 +15,7 @@ data "aws_iam_policy_document" "trust_policy_lambda" {
   }
 }
 
-data "aws_iam_policy_document" "trust_policy_state_machine" {
-  statement {
-    effect = "Allow"
 
-    principals {
-      type        = "Service"
-      identifiers = ["states.amazonaws.com"]
-    }
-
-    actions = ["sts:AssumeRole"]
-  }
-}
 
 # Roles
 
@@ -47,10 +36,7 @@ resource "aws_iam_role" "load_lambda_role" {
   assume_role_policy = data.aws_iam_policy_document.trust_policy_lambda.json
 }
 
-resource "aws_iam_role" "state_machine_role" {
-  name_prefix        = "general-state-machine-role"
-  assume_role_policy = data.aws_iam_policy_document.trust_policy_state_machine.json
-}
+
 
 # Please define the Data blocks for policy documents and 
 # Create two Resource blocks:
@@ -58,23 +44,28 @@ resource "aws_iam_role" "state_machine_role" {
 # One for attaching the "aws_iam_role_policy_attachment" to the roles created above
 
 
-###S3 policies
-
-# policy document for s3 bucket
-data "aws_iam_policy_document" "ingestion_s3_policy" {
-  statement {
-    sid = "1"
-
-    actions   = ["s3:PutObject"]
-    resources = ["${aws_s3_bucket.ingestion_bucket.arn}/*"]
-  }
-}
 
 /*
 # ------------------------------
 # Lambda IAM Policy for S3-ingestion
 # ------------------------------
 */
+
+# policy document for s3 bucket
+data "aws_iam_policy_document" "ingestion_s3_policy" {
+  statement {
+    sid = "1"
+
+    actions   = ["s3:PutObject", 
+                "s3:Get*",
+                "s3:List*",
+                "s3:Describe*",
+                "s3-object-lambda:Get*",
+                "s3-object-lambda:List*"]
+    resources = ["${aws_s3_bucket.ingestion_bucket.arn}"]
+  }
+}
+
 
 
 # policy for s3 ingestion bucket
@@ -219,4 +210,161 @@ resource "aws_iam_role_policy_attachment" "load_lambda_cw_policy_attachment" {
 
   policy_arn = aws_iam_policy.cloudwatch_policy_load.arn
   role       = aws_iam_role.load_lambda_role.name
+}
+
+
+/*
+# ------------------------------
+# Lambda IAM Policy for Secret Manager
+# ------------------------------
+*/
+
+#ingestion lambda policy document for secret manager
+data "aws_iam_policy_document" "ingestion_lambda_secret_manager" {
+  statement {
+    sid    = "BasePermissions"
+    effect = "Allow"
+    actions = [
+      "secretsmanager:*",
+      "lambda:ListFunctions",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "LambdaPermissions"
+    effect = "Allow"
+    actions = [
+      "lambda:AddPermission",
+      "lambda:CreateFunction",
+      "lambda:GetFunction",
+      "lambda:InvokeFunction",
+      "lambda:UpdateFunctionConfiguration"
+    ]
+    resources = ["arn:aws:lambda:*:*:function:SecretsManager*"]
+  }
+}
+
+
+# policy for secret manager
+resource "aws_iam_policy" "secret_manager_policy" {
+  name_prefix = "secret_manager-policy-${var.ingestion_lambda}"
+
+  policy = data.aws_iam_policy_document.ingestion_lambda_secret_manager.json
+
+}
+
+# policy attachment to the role "iam_role_for_lambda"
+resource "aws_iam_policy_attachment" "lambda_secret_manager_policy_attachment" {
+  name       = "lambda-secret-manager-attachment"
+  roles      = [aws_iam_role.ingestion_lambda_role.name]
+  policy_arn = aws_iam_policy.secret_manager_policy.arn
+}
+
+/*
+# -----------------------------------
+# Lambda IAM Policy for StateMachine 
+# -----------------------------------
+*/
+
+data "aws_iam_policy_document" "trust_policy_state_machine" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["states.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "state_machine_role" {
+  name_prefix        = "general-state-machine-role"
+  assume_role_policy = data.aws_iam_policy_document.trust_policy_state_machine.json
+}
+
+data "aws_iam_policy_document" "state_machine_role_policy" {
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "lambda:InvokeFunction"
+    ]
+
+    resources = [
+      "arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${var.ingestion_lambda}:*",
+      "arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${var.transform_lambda}:*",
+      "arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${var.load_lambda}:*"
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "lambda:InvokeFunction"
+    ]
+
+    resources = [
+      "arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${var.ingestion_lambda}",
+      "arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${var.transform_lambda}",
+      "arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${var.load_lambda}"
+    ]
+  }
+
+}
+resource "aws_iam_role_policy" "StateMachinePolicy" {
+  role   = aws_iam_role.state_machine_role.id
+  policy = data.aws_iam_policy_document.state_machine_role_policy.json
+}
+
+/*
+# ----------------------------------
+# Lambda IAM Policy for EventBridge
+# ----------------------------------
+*/
+
+data "aws_iam_policy_document" "trust_policy_event_bridge" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["states.amazonaws.com",
+                    "scheduler.amazonaws.com"]
+    }
+
+    actions = [
+      "sts:AssumeRole",
+    ]
+  }
+}
+
+resource "aws_iam_role" "event_bridge_role" {
+  name_prefix        = "general-event-bridge-role"
+  assume_role_policy = data.aws_iam_policy_document.trust_policy_event_bridge.json
+}
+
+data "aws_iam_policy_document" "eventbridge_document_execution" {
+  statement {
+    actions = ["states:StartExecution"]
+    effect  = "Allow"
+    resources = [
+      "arn:aws:states:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:stateMachine:${var.state_machine}"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "eventbridge_policy_state_machine_execution" {
+  name_prefix = "state-machine-execution-eventbridge-"
+  policy      = data.aws_iam_policy_document.eventbridge_document_execution.json 
+}
+
+
+resource "aws_iam_role_policy_attachment" "eventbridge_policy_attachment" {
+  role       = aws_iam_role.event_bridge_role.name
+  policy_arn = aws_iam_policy.eventbridge_policy_state_machine_execution.arn
 }
