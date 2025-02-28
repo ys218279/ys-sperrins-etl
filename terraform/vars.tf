@@ -44,3 +44,18 @@ variable "default_timeout" {
   type    = number
   default = 20
 }
+
+
+variable "lambda_ingestion_topic_name" {
+  description = "Value of the Name tag for the lambda_Ingestion_topic_name"
+  type        = string
+  default = "team_sperrins_topic"
+  
+}
+
+variable "email_address" {
+  description = "value of email used to subscribe to sns"
+  //we are using a fake temp email service to set as a defualt email until we have one made for the project
+  type        = string
+  default = "teamsperrins09@gmail.com"
+}
