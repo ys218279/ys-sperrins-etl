@@ -22,7 +22,9 @@ from datetime import datetime
 from pg8000.native import identifier
 from connection import connect_to_db, close_db_connection
 from pprint import pprint
-from utils import list_s3_objects, upload_to_s3
+from utils import list_s3_objects, upload_to_s3, get_s3_client, fetch_latest_update_time_from_s3, fetch_latest_update_time_from_db
+import sys
+sys.path.append('src/src_ingestion')
 
 BUCKET_NAME = os.environ["S3_BUCKET_NAME"]
 
@@ -32,20 +34,55 @@ BUCKET_NAME = os.environ["S3_BUCKET_NAME"]
     
     # list_of_files = [response['Contents'][i]['Key'] for i in range(len(response['Contents']))]
 
+# def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
+#     conn = connect_to_db()
+#     client = get_s3_client()
+#     response = list_s3_objects(client, BUCKET_NAME)
+#     if 'Contents' not in response:
+#         raw_table_list =conn.run("SELECT * from information_schema.tables")
+#         table_list = [item[2] for item in raw_table_list if item[1] == 'public'][1:]
+#         for table in table_list:
+#             raw_data = conn.run(f"SELECT * FROM {identifier(table)}")
+#             columns = [col['name'] for col in conn.columns]
+#             result = {"columns" : columns, "data" : raw_data}
+#             filename = datetime.now().strftime('%H%M%S')
+#             upload_to_s3(BUCKET_NAME, table, result)
+#         return {"base_time": filename, "new_data": False}
+
 def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
     conn = connect_to_db()
-    response = list_s3_objects(BUCKET_NAME)
-    if 'Contents' not in response:
-        raw_table_list =conn.run("SELECT * from information_schema.tables")
-        table_list = [item[2] for item in raw_table_list if item[1] == 'public'][1:]
-        for table in table_list:
-            raw_data = conn.run(f"SELECT * FROM {table}")
+    client = get_s3_client()
+    # response = list_s3_objects(client, BUCKET_NAME)
+    raw_table_list =conn.run("SELECT * from information_schema.tables")
+    table_list = [item[2] for item in raw_table_list if item[1] == 'public'][1:]
+    output = {}
+    for table in table_list:
+        latest_update_s3 = fetch_latest_update_time_from_s3(client, BUCKET_NAME)
+        latest_update_db = fetch_latest_update_time_from_db(conn, table)
+        if latest_update_db > latest_update_s3:
+            latest_update_s3_dt = datetime.strptime(latest_update_s3, "%Y%m%d%H%M%S")
+            raw_data = conn.run(f"SELECT * FROM {identifier(table)} WHERE last_updated > :last_update_s3_dt'", latest_update_s3_dt=latest_update_s3_dt)
             columns = [col['name'] for col in conn.columns]
             result = {"columns" : columns, "data" : raw_data}
             filename = datetime.now().strftime('%H%M%S')
-            upload_to_s3(BUCKET_NAME, table, result)
-        return {"base_time": filename, "new_data": False}
-            
+            object_name = upload_to_s3(BUCKET_NAME, table, result)
+            output[table] = object_name
+        else:
+            output[table] = False
+    return output
+    
+
+    # if 'Contents' not in response:
+    #     for table in table_list:
+    #         raw_data = conn.run(f"SELECT * FROM {table}")
+    #         columns = [col['name'] for col in conn.columns]
+    #         result = {"columns" : columns, "data" : raw_data}
+    #         filename = datetime.now().strftime('%H%M%S')
+    #         upload_to_s3(BUCKET_NAME, table, result)
+    #     return {"base_time": filename, "new_data": False}
+    # else:
+    #     for table in table_list:
+
             
 #         try:
 #             client = boto3.client('secretsmanager')
