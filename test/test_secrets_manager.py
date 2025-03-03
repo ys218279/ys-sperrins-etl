@@ -5,6 +5,7 @@ from unittest.mock import patch
 from moto import mock_aws
 import io
 import os
+import json
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -44,7 +45,19 @@ class TestRetrieval:
         with mock_aws():
             client = boto3.client("secretsmanager")
             with patch("sys.stdout", new=io.StringIO()) as fake_out:
-                entry(client)
+                secret_identifier = "de_2024_12_02"
+                get_username = input('Please enter your username:')
+                get_password = input("Please enter your password:")
+                get_host = input("Please enter your host:")
+                get_database = input("Please enter your database:")
+                get_port = input("Please enter your port:")
+                secret_value = {"username": get_username,
+                                "password": get_password,
+                                "host": get_host,
+                                "database": get_database,
+                                "port": get_port}
+                secret_string = json.dumps(secret_value)
+                client.create_secret(Name=secret_identifier, SecretString=secret_string)
                 retrieval(client)
                 mock_input.input_args = ["de_2024_12_02"]
                 result = fake_out.getvalue()
@@ -55,7 +68,19 @@ class TestRetrieval:
         with mock_aws():
             client = boto3.client("secretsmanager")
             with patch("sys.stdout", new=io.StringIO()) as fake_out:
-                entry(client)
+                secret_identifier = "de_2024_12_02"
+                get_username = input('Please enter your username:')
+                get_password = input("Please enter your password:")
+                get_host = input("Please enter your host:")
+                get_database = input("Please enter your database:")
+                get_port = input("Please enter your port:")
+                secret_value = {"username": get_username,
+                                "password": get_password,
+                                "host": get_host,
+                                "database": get_database,
+                                "port": get_port}
+                secret_string = json.dumps(secret_value)
+                client.create_secret(Name=secret_identifier, SecretString=secret_string)
                 res = retrieval(client)
                 mock_input.input_args = ["de_2024_12_02"]
                 assert res == {

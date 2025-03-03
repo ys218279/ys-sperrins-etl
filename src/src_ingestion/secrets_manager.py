@@ -1,6 +1,5 @@
 import json
 
-
 def retrieval(client):
     """Retrieve a secret called de_2024_12_02 from aws secrets manager.
     
