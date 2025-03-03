@@ -85,6 +85,77 @@ resource "aws_iam_policy_attachment" "lambda_s3_policy_attachment" {
 }
 
 
+# Transform Lambda permissions
+
+# policy document for s3 bucket
+data "aws_iam_policy_document" "transform_s3_policy" {
+  statement {
+    sid = "1"
+
+    actions   = ["s3:PutObject", 
+                "s3:Get*",
+                "s3:List*",
+                "s3:Describe*",
+                "s3-object-lambda:Get*",
+                "s3-object-lambda:List*"]
+    resources = ["${aws_s3_bucket.ingestion_bucket.arn}",
+                  "${aws_s3_bucket.ingestion_bucket.arn}/*",
+                  "${aws_s3_bucket.processed_bucket.arn}",
+                  "${aws_s3_bucket.processed_bucket.arn}/*"]
+  }
+}
+
+
+# policy for s3 processed bucket
+resource "aws_iam_policy" "transform_s3_policy" {
+  name_prefix = "s3-policy-${var.transform_lambda}-write"
+
+  policy = data.aws_iam_policy_document.transform_s3_policy.json
+
+}
+
+# policy attachment to the role "iam_role_for_lambda"
+resource "aws_iam_policy_attachment" "lambda_transform_s3_policy_attachment" {
+  name       = "lambda-s3-policy-attachment"
+  roles      = [aws_iam_role.transform_lambda_role.name]
+  policy_arn = aws_iam_policy.transform_s3_policy.arn
+}
+
+# Load Lambda permissions
+
+# policy document for s3 bucket
+data "aws_iam_policy_document" "load_s3_policy" {
+  statement {
+    sid = "1"
+
+    actions   = ["s3:PutObject", 
+                "s3:Get*",
+                "s3:List*",
+                "s3:Describe*",
+                "s3-object-lambda:Get*",
+                "s3-object-lambda:List*"]
+    resources = [
+                  "${aws_s3_bucket.processed_bucket.arn}",
+                  "${aws_s3_bucket.processed_bucket.arn}/*"]
+  }
+}
+
+
+# policy for s3 processed bucket
+resource "aws_iam_policy" "load_s3_policy" {
+  name_prefix = "s3-policy-${var.load_lambda}-write"
+
+  policy = data.aws_iam_policy_document.load_s3_policy.json
+
+}
+
+# policy attachment to the role "iam_role_for_lambda"
+resource "aws_iam_policy_attachment" "lambda_load_s3_policy_attachment" {
+  name       = "lambda-s3-policy-attachment"
+  roles      = [aws_iam_role.load_lambda_role.name]
+  policy_arn = aws_iam_policy.load_s3_policy.arn
+}
+
 
 /*
 # ------------------------------
@@ -333,9 +404,9 @@ data "aws_iam_policy_document" "trust_policy_event_bridge" {
     effect = "Allow"
 
     principals {
-      type        = "Service"
+      type = "Service"
       identifiers = ["states.amazonaws.com",
-                    "scheduler.amazonaws.com"]
+      "scheduler.amazonaws.com"]
     }
 
     actions = [
@@ -361,7 +432,7 @@ data "aws_iam_policy_document" "eventbridge_document_execution" {
 
 resource "aws_iam_policy" "eventbridge_policy_state_machine_execution" {
   name_prefix = "state-machine-execution-eventbridge-"
-  policy      = data.aws_iam_policy_document.eventbridge_document_execution.json 
+  policy      = data.aws_iam_policy_document.eventbridge_document_execution.json
 }
 
 
