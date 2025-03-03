@@ -56,3 +56,41 @@ variable "processed_bucket_prefix" {
   default     = "processed-zone"
 
 }
+
+variable "totesys_credentials_secret_name" {
+  description = "Name of secret containing totesys db credentials"
+  type = string
+  default = "de_2024_12_02"
+}
+
+#INTERACTIVE VARIABLES
+/* Whenever we create an interactive variable we have to use
+the prefix letter to set the order of the interactive 
+variables, interactive variables are called in alphabetical
+order */
+
+variable "a_totesys_username" {
+  description = "Please enter your totesys DB username: "
+  type = string
+}
+
+variable "b_totesys_password" {
+  description = "Please enter your totesys DB password: "
+  type = string
+  sensitive = true
+}
+
+variable "c_totesys_host" {
+  description = "Please enter your totesys DB host: "
+  type = string
+}
+
+variable "d_totesys_database" {
+  description = "Please enter your totesys database name : "
+  type = string
+}
+
+variable "e_totesys_port" {
+  description = "Please enter your totesys DB port: "
+  type = string
+}
