@@ -2,63 +2,141 @@ import boto3
 from botocore.exceptions import ClientError
 import json
 from datetime import datetime
-from pg8000.native import identifier
+from pg8000.native import Connection
+import sys
+
+sys.path.append("src/src_ingestion")
+
+
+# This is the entry function which will only be used once to create the initial secret that will store the totesys DB credentials
+def entry(client):
+    if "SecretsManager" in str(type(client)):
+        secret_identifier = "de_2024_12_02"
+        get_username = input("Please enter your username: ")
+        get_password = input("Please enter your password:")
+        get_host = input("Please enter your host: ")
+        get_database = input("Please enter your database: ")
+        get_port = input("Please enter your port: ")
+        secret_value = {
+            "username": get_username,
+            "password": get_password,
+            "host": get_host,
+            "database": get_database,
+            "port": get_port,
+        }
+        secret_string = json.dumps(secret_value)
+        try:
+            client.create_secret(Name=secret_identifier, SecretString=secret_string)
+            print("Secret saved.")
+        except client.exceptions.ResourceExistsException as e:
+            print("Secret already exists!")
+        except Exception as err:
+            print({"ERROR": err, "message": "Fail to connect to aws secret manager!"})
+    else:
+        print("invalid client type used for secret manager! plz contact developer!")
+
+
+# This is the retrieval function which accesses the secret storing the totesys DB credentials as a dictionary
+# This function can be used multiple times whenever user needs DB credentials in lambda
+def retrieval(client, secret_identifier="de_2024_12_02"):
+    if "SecretsManager" in str(type(client)):
+        try:
+            response = client.get_secret_value(SecretId=secret_identifier)
+            res_str = response["SecretString"]
+            res_dict = json.loads(res_str)
+            return res_dict
+        except client.exceptions.ResourceNotFoundException as err:
+            print(err)
+        except Exception as err:
+            print({"ERROR": err, "massage": "Fail to connect to aws secret manager!"})
+    else:
+        print("invalid client type used for secret manager! plz contact developer!")
+
+
+def connect_to_db(secret_identifier="de_2024_12_02"):
+    client = get_secrets_manager_client()
+    credentials = retrieval(client, secret_identifier=secret_identifier)
+
+    if not credentials:
+        entry(client)
+        credentials = retrieval(client)
+
+    return Connection(
+        user=credentials["username"],
+        password=credentials["password"],
+        database=credentials["dbname"],
+        host=credentials["host"],
+    )
+
+
+def close_db_connection(conn):
+    conn.close()
+
 
 def get_s3_client():
+    """return a client to connect to s3"""
     try:
-        client = boto3.client('s3')
+        client = boto3.client("s3")
         return client
-    except ClientError as e:
-        raise RuntimeError("failed to connect to s3, error message as {e}") from e
-    
+    except ClientError:
+        raise ClientError(
+            {
+                "Error": {
+                    "Code": "FailedToConnect",
+                    "Message": "failed to connect to s3",
+                }
+            },
+            "GetS3Client",
+        )
+
+
 def get_secrets_manager_client():
+    """return a client to connect to secret manager"""
     try:
         client = boto3.client("secretsmanager")
         return client
-    except ClientError as e:
-        raise RuntimeError(f"failed to connect to secret manager, error message as {e}") from e
+    except ClientError:
+        raise ClientError(
+            {
+                "Error": {
+                    "Code": "FailedToConnect",
+                    "Message": "failed to connect to secret manager",
+                }
+            },
+            "GetSecretsManagerClient",
+        )
 
-def list_s3_objects(client, bucket_name):
-    return client.list_objects_v2(Bucket=bucket_name)
 
 def upload_to_s3(bucket_name, table, result):
-    tmp_file_path = f'/tmp/{table}.json'
-    with open(tmp_file_path, 'w') as f:
+    """upload the file to s3 bucker and return the object name"""
+    tmp_file_path = f"/tmp/{table}.json"
+    with open(tmp_file_path, "w") as f:
         filedatain = json.dumps(result, indent=4, sort_keys=True, default=str)
-        res_bytes = filedatain.encode('utf-8')
+        res_bytes = filedatain.encode("utf-8")
     s3_client = get_s3_client()
-    y_m_d = datetime.now().strftime('%Y%m%d')
-    filename = datetime.now().strftime('%H%M%S')
+    y_m_d = datetime.now().strftime("%Y%m%d")
+    filename = datetime.now().strftime("%H%M%S")
     object_name = f"{table}/{y_m_d}{filename}"
     s3_client.put_object(Body=res_bytes, Bucket=bucket_name, Key=object_name)
     return object_name
 
-#if the max of last updated from db is diff from the max 
 def fetch_latest_update_time_from_s3(client, bucket_name, table_name):
     """fetch the latest time of the file being loaded to s3 bucket and return the latest upload time as int."""
-    response = client.list_objects_v2(Bucket=bucket_name, Prefix=table_name + '/')
-    raw_all_updates = response.get('Contents', [])
+    response = client.list_objects_v2(Bucket=bucket_name, Prefix=table_name + "/")
+    raw_all_updates = response.get("Contents", [])
     if raw_all_updates:
-        all_tables = [update['Key'].split('/')[0] for update in raw_all_updates]
+        all_tables = [update["Key"].split("/")[0] for update in raw_all_updates]
         if table_name not in all_tables:
             return 20000101000001
-        all_updates = [update['Key'].split('/')[-1] for update in raw_all_updates]
+        all_updates = [update["Key"].split("/")[-1] for update in raw_all_updates]
         last_update = max(list(map(int, all_updates)))
         return last_update
     return 20000101000001
-    
+
 def fetch_latest_update_time_from_db(conn, table_name):
     """fetch the latest update of the table in db and return the latest update time as int."""
-    query = f'SELECT last_updated FROM {identifier(table_name)} ORDER BY last_updated DESC LIMIT 1;'
+    query = f"SELECT last_updated FROM {table_name} ORDER BY last_updated DESC LIMIT 1;"
     raw_last_updated = conn.run(query)
     last_updated_dt = raw_last_updated[0][0]
-    formatted_res = int(last_updated_dt.strftime('%Y%m%d%H%M%S'))
+    formatted_res = int(last_updated_dt.strftime("%Y%m%d%H%M%S"))
     return formatted_res
-
-
-#strp
-
-    
-
-
-
