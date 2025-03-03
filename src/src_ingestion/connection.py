@@ -27,5 +27,6 @@ def close_db_connection(conn):
     """Close connection to totesys database
     
     Keyword arguements:
-    - conn -- connection to totesys database"""
+    - conn -- connection to totesys database
+    """
     conn.close()
