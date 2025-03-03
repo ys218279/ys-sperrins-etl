@@ -1,10 +1,12 @@
-from src.src_ingestion.ingestion_lambda import lambda_handler
+from unittest.mock import patch
 import boto3
 from moto import mock_aws
 import pytest, json
 import os
 from datetime import datetime
 
+with patch.dict(os.environ, {"S3_BUCKET_NAME": "test_bucket"}):
+    from src.src_ingestion.ingestion_lambda import lambda_handler
 
 @pytest.fixture(autouse=True)
 def aws_credentials():

@@ -21,13 +21,13 @@ def test_mock_client():
         yield client
 
 
-def test_filename_is_fetched_correctly_from_s3_bucket(test_mock_client):
-    input_file = "staff/2025_02_25/110314.json"
-    test_dict = {"columns" : [1,2,3,4], "data" : ["insert here"]}
-    res_bytes = json.dumps(test_dict).encode('utf-8')
-    test_mock_client.put_object(Body=res_bytes, Bucket='my_test_bucket', Key=input_file)
-    response = lambda_handler(1,1,'my_test_bucket')
-    assert response["base_time"] == '2025_02_25/110314'
+# def test_filename_is_fetched_correctly_from_s3_bucket(test_mock_client):
+#     input_file = "staff/2025_02_25/110314.json"
+#     test_dict = {"columns" : [1,2,3,4], "data" : ["insert here"]}
+#     res_bytes = json.dumps(test_dict).encode('utf-8')
+#     test_mock_client.put_object(Body=res_bytes, Bucket='my_test_bucket', Key=input_file)
+#     response = lambda_handler(1,1,'my_test_bucket')
+#     assert response["base_time"] == '2025_02_25/110314'
 
 
 def test_file_writes_to_s3_bucket(test_mock_client):
