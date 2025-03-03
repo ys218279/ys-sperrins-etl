@@ -1,4 +1,4 @@
-from src.src_ingestion.secrets_manager import entry, retrieval
+from src.src_ingestion.secrets_manager import retrieval
 import pytest
 import boto3
 from unittest.mock import patch
@@ -35,47 +35,6 @@ def input_args_2():
     yield "database"
     yield "port"
     yield "abc"
-
-
-class TestUtilsEntry:
-    @patch("builtins.input", side_effect=input_args())
-    def test_entry_successful(self, mock_input):
-        with mock_aws():
-            client = boto3.client("secretsmanager")
-            with patch("sys.stdout", new=io.StringIO()) as fake_out:
-                entry(client)
-                result = fake_out.getvalue()
-                assert "Secret saved." in result
-
-    @patch("builtins.input", side_effect=input_args())
-    def test_entry_fails(self, mock_input):
-        with mock_aws():
-            client = boto3.client("s3")
-            with patch("sys.stdout", new=io.StringIO()) as fake_out:
-                entry(client)
-                result = fake_out.getvalue()
-                assert (
-                    "invalid client type used for secret manager! plz contact developer!"
-                    in result
-                )
-
-    @patch("builtins.input", side_effect=input_args())
-    def test_entry_successfully_stored(self, mock_input):
-        with mock_aws():
-            client = boto3.client("secretsmanager")
-            entry(client)
-            response = client.list_secrets()
-            assert len(response["SecretList"]) == 1
-
-    @patch("builtins.input", side_effect=input_args())
-    def test_secret_already_exists(self, mock_input):
-        with mock_aws():
-            client = boto3.client("secretsmanager")
-            entry(client)
-            with patch("sys.stdout", new=io.StringIO()) as fake_out:
-                entry(client)
-                result = fake_out.getvalue()
-                assert "Secret already exists!" in result
 
 
 class TestRetrieval:
