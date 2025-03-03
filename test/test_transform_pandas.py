@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from src.src_transform.transform_pandas import create_dim_design_table, create_dim_currency_table, create_dim_staff_table, create_dim_location_table, create_dim_counterparty_table, create_dim_date_table
+from src.src_transform.transform_pandas import create_dim_design_table, create_dim_currency_table, create_dim_staff_table, create_dim_location_table, create_dim_counterparty_table, create_dim_date_table, create_fact_sales_table
 
 
 def test_create_dim_design_creates_correct_schema(input_data_design, output_data_design):
@@ -26,3 +26,8 @@ def test_create_dim_counterparty_creates_correct_schema(input_data_address, inpu
 def test_create_dim_date_creates_correct_schema(output_data_date):
     dim_date_data = create_dim_date_table(start='2025/03/03', end='2025/03/05')
     pd.testing.assert_frame_equal(dim_date_data, output_data_date, check_dtype=False)
+
+def test_create_fact_sales_order(input_data_sales_order,output_data_sales_order):
+    fact_sales_order_data = create_fact_sales_table(input_data_sales_order)
+    pd.testing.assert_frame_equal(fact_sales_order_data,output_data_sales_order)
+    

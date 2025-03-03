@@ -54,5 +54,12 @@ def create_dim_date_table(start='2000/01/01', end='2050/12/31'):
     df_date_mod = df_date.drop(columns=['Date'])
     return df_date_mod
 
-def create_fact_sales_table():
-    pass
+def create_fact_sales_table(df_sales_order):
+    df_sales_order["created_date"] = pd.to_datetime(df_sales_order["created_at"]).dt.date
+    df_sales_order["created_time"] = pd.to_datetime(df_sales_order["created_at"]).dt.time
+    df_sales_order["last_updated_date"] = pd.to_datetime(df_sales_order["last_updated"]).dt.date
+    df_sales_order["last_updated_time"] = pd.to_datetime(df_sales_order["last_updated"]).dt.time
+    df_fact_sales_order = df_sales_order.drop(columns=['created_at','last_updated'])
+    return df_fact_sales_order
+
+
