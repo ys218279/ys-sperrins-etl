@@ -34,17 +34,18 @@ def upload_to_s3(bucket_name, table, result):
     return object_name
 
 #if the max of last updated from db is diff from the max 
-def fetch_latest_update_time_from_s3(client, bucket_name):
+def fetch_latest_update_time_from_s3(client, bucket_name, table_name):
     """fetch the latest time of the file being loaded to s3 bucket and return the latest upload time as int."""
-    response = client.list_objects_v2(Bucket=bucket_name)
+    response = client.list_objects_v2(Bucket=bucket_name, Prefix=table_name + '/')
     raw_all_updates = response.get('Contents', [])
-    print(raw_all_updates)
     if raw_all_updates:
+        all_tables = [update['Key'].split('/')[0] for update in raw_all_updates]
+        if table_name not in all_tables:
+            return 20000101000001
         all_updates = [update['Key'].split('/')[-1] for update in raw_all_updates]
         last_update = max(list(map(int, all_updates)))
         return last_update
-    else:
-        return 20000101000001
+    return 20000101000001
     
 def fetch_latest_update_time_from_db(conn, table_name):
     """fetch the latest update of the table in db and return the latest update time as int."""
