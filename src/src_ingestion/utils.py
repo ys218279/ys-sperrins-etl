@@ -128,7 +128,7 @@ def fetch_latest_update_time_from_s3(client, bucket_name, table_name):
         all_tables = [update["Key"].split("/")[0] for update in raw_all_updates]
         if table_name not in all_tables:
             return 20000101000001
-        all_updates = [update["Key"].split("/")[-1] for update in raw_all_updates]
+        all_updates = [update["Key"].split("/")[-1][:-5] for update in raw_all_updates]
         last_update = max(list(map(int, all_updates)))
         return last_update
     return 20000101000001

@@ -83,9 +83,9 @@ class TestFetchLatestUpdateS3:
                 CreateBucketConfiguration={"LocationConstraint": "eu-west-2"},
             )
             objects = [
-                "table/20250301174108",
-                "table/20250302140516",
-                "table/20250103131459",
+                "table/20250301174108.json",
+                "table/20250302140516.json",
+                "table/20250103131459.json",
             ]
             for i in objects:
                 client.put_object(Bucket=bucket_name, Key=i, Body="test")
