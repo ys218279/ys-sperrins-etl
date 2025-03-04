@@ -143,7 +143,7 @@ class TestEntry:
     @patch("builtins.input", side_effect=input_args())
     def test_entry_successful(self, mock_input):
         with mock_aws():
-            client = boto3.client("secretsmanager")
+            client = boto3.client("secretsmanager", region_name="eu-west-2")
             with patch("sys.stdout", new=io.StringIO()) as fake_out:
                 entry(client)
                 secret = client.get_secret_value(SecretId="de_2024_12_02")
@@ -152,7 +152,7 @@ class TestEntry:
     @patch("builtins.input", side_effect=input_args())
     def test_entry_fails(self, mock_input):
         with mock_aws():
-            client = boto3.client("s3")
+            client = boto3.client("s3", region_name="eu-west-2")
             with patch("sys.stdout", new=io.StringIO()) as fake_out:
                 entry(client)
                 result = fake_out.getvalue()
@@ -164,7 +164,7 @@ class TestEntry:
     @patch("builtins.input", side_effect=input_args())
     def test_entry_successfully_stored(self, mock_input):
         with mock_aws():
-            client = boto3.client("secretsmanager")
+            client = boto3.client("secretsmanager", region_name="eu-west-2")
             entry(client)
             response = client.list_secrets()
             assert len(response["SecretList"]) == 1
@@ -172,7 +172,7 @@ class TestEntry:
     @patch("builtins.input", side_effect=input_args())
     def test_secret_already_exists(self, mock_input):
         with mock_aws():
-            client = boto3.client("secretsmanager")
+            client = boto3.client("secretsmanager", region_name="eu-west-2")
             entry(client)
             with patch("sys.stdout", new=io.StringIO()) as fake_out:
                 entry(client)
@@ -185,7 +185,7 @@ class TestRetrieval:
     def test_retrieval_successful_1_secret(self, mock_input):
         mock_input.input_args = ["de_2024_12_02"]
         with mock_aws():
-            client = boto3.client("secretsmanager")
+            client = boto3.client("secretsmanager", region_name="eu-west-2")
             entry(client)
             res = retrieval(client)
             assert res is not None
@@ -209,7 +209,7 @@ class TestRetrieval:
     @patch("builtins.input")
     def test_retrieval_secret_doesnot_exist(self, mock_input):
         with mock_aws():
-            client = boto3.client("secretsmanager")
+            client = boto3.client("secretsmanager", region_name="eu-west-2")
             with patch("sys.stdout", new=io.StringIO()) as fake_out:
                 retrieval(client)
                 result = fake_out.getvalue()

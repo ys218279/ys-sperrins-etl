@@ -76,7 +76,7 @@ def close_db_connection(conn):
 def get_s3_client():
     """return a client to connect to s3"""
     try:
-        client = boto3.client("s3")
+        client = boto3.client("s3", region_name="eu-west-2")
         return client
     except ClientError:
         raise ClientError(
@@ -93,7 +93,7 @@ def get_s3_client():
 def get_secrets_manager_client():
     """return a client to connect to secret manager"""
     try:
-        client = boto3.client("secretsmanager")
+        client = boto3.client("secretsmanager", region_name="eu-west-2")
         return client
     except ClientError:
         raise ClientError(
