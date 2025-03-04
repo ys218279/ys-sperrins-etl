@@ -140,3 +140,4 @@ def fetch_latest_update_time_from_db(conn, table_name):
     last_updated_dt = raw_last_updated[0][0]
     formatted_res = int(last_updated_dt.strftime("%Y%m%d%H%M%S"))
     return formatted_res
+

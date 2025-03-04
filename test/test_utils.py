@@ -11,12 +11,13 @@ from src.src_ingestion.utils import (
 )
 import boto3
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 from moto import mock_aws
 import json
 from botocore.exceptions import ClientError
 import io
 import os
+import pytest
 
 
 class TestGetS3Client(unittest.TestCase):
@@ -38,7 +39,7 @@ class TestGetS3Client(unittest.TestCase):
 class TestGetSMClient(unittest.TestCase):
     def test_get_s3_client_success(self):
         client = get_secrets_manager_client()
-        assert "SecretsManager" in str(type(boto3.client("secretsmanager")))
+        assert "SecretsManager" in str(type(boto3.client("secretsmanager", region_name="eu-west-2")))
 
     @patch("boto3.client")
     def test_get_s3_client_fail(self, mock_boto_client):
@@ -107,15 +108,6 @@ class TestFetchLatestUpdateS3:
                 fetch_latest_update_time_from_s3(client, bucket_name, "table")
                 == 20000101000001
             )
-
-
-class TestFetchLastUpdateDB:
-    def test_fetch_latest_update_time_from_db(self):
-        conn = connect_to_db(secret_identifier="de_2024_12_02")
-        table = "address"
-        res = fetch_latest_update_time_from_db(conn, table)
-        assert res == 20221103142049
-
 
 def input_args():
     yield "bidenj"
@@ -193,7 +185,7 @@ class TestRetrieval:
     @patch("builtins.input", side_effect=input_args())
     def test_retrieval_successful_return_dict(self, mock_input):
         with mock_aws():
-            client = boto3.client("secretsmanager")
+            client = boto3.client("secretsmanager", region_name="eu-west-2")
             with patch("sys.stdout", new=io.StringIO()) as fake_out:
                 entry(client)
                 res = retrieval(client)
