@@ -1,5 +1,6 @@
 resource "aws_secretsmanager_secret" "totesys_secret" {
   name = var.totesys_credentials_secret_name
+  recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret_version" "totesys_secret_version" {
