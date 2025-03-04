@@ -4,8 +4,6 @@ from src.src_ingestion.utils import (
     upload_to_s3,
     fetch_latest_update_time_from_s3,
     fetch_latest_update_time_from_db,
-    connect_to_db,
-    close_db_connection,
     entry,
     retrieval,
 )
@@ -18,7 +16,7 @@ from botocore.exceptions import ClientError
 import io
 import os
 import pytest
-
+import datetime
 
 class TestGetS3Client(unittest.TestCase):
     def test_get_s3_client_success(self):
@@ -96,18 +94,12 @@ class TestFetchLatestUpdateS3:
                 == 20250302140516
             )
 
+class TestFectchLatestUpdateDB:
     def test_fetch_latest_upload_when_s3_is_empty(self):
-        with mock_aws():
-            client = boto3.client("s3", region_name="eu-west-2")
-            bucket_name = "test-bucket"
-            client.create_bucket(
-                Bucket=bucket_name,
-                CreateBucketConfiguration={"LocationConstraint": "eu-west-2"},
-            )
-            assert (
-                fetch_latest_update_time_from_s3(client, bucket_name, "table")
-                == 20000101000001
-            )
+        mock_conn = Mock()
+        mock_conn.run.return_value = [[datetime.datetime(2022, 11, 3, 14, 20, 49, 962000)]]
+        result = fetch_latest_update_time_from_db(mock_conn, "mock_table")
+        assert result == 20221103142049
 
 def input_args():
     yield "bidenj"
