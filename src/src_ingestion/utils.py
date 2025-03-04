@@ -8,8 +8,8 @@ import sys
 sys.path.append("src/src_ingestion")
 
 
-# This is the entry function which will only be used once to create the initial secret that will store the totesys DB credentials
 def entry(client):
+    """will only be used once to create the initial secret that will store the totesys DB credentials"""
     if "SecretsManager" in str(type(client)):
         secret_identifier = "de_2024_12_02"
         get_username = input("Please enter your username: ")
@@ -35,10 +35,8 @@ def entry(client):
     else:
         print("invalid client type used for secret manager! plz contact developer!")
 
-
-# This is the retrieval function which accesses the secret storing the totesys DB credentials as a dictionary
-# This function can be used multiple times whenever user needs DB credentials in lambda
 def retrieval(client, secret_identifier="de_2024_12_02"):
+    """return the credentials to the totesys db in a dictionary"""
     if "SecretsManager" in str(type(client)):
         try:
             response = client.get_secret_value(SecretId=secret_identifier)
@@ -54,6 +52,7 @@ def retrieval(client, secret_identifier="de_2024_12_02"):
 
 
 def connect_to_db(secret_identifier="de_2024_12_02"):
+    """return conn to totesys db"""
     client = get_secrets_manager_client()
     credentials = retrieval(client, secret_identifier=secret_identifier)
 
@@ -70,6 +69,7 @@ def connect_to_db(secret_identifier="de_2024_12_02"):
 
 
 def close_db_connection(conn):
+    """close db"""
     conn.close()
 
 
