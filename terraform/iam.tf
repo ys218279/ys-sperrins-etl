@@ -440,3 +440,53 @@ resource "aws_iam_role_policy_attachment" "eventbridge_policy_attachment" {
   role       = aws_iam_role.event_bridge_role.name
   policy_arn = aws_iam_policy.eventbridge_policy_state_machine_execution.arn
 }
+
+
+
+/*
+# ------------------------------
+# LOAD Lambda IAM Policy for Secret Manager
+# ------------------------------
+*/
+
+#load lambda policy document for secret manager
+data "aws_iam_policy_document" "load_lambda_secrets_manager" {
+  statement {
+    sid    = "BasePermissions"
+    effect = "Allow"
+    actions = [
+      "secretsmanager:*",
+      "lambda:List*",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "LambdaPermissions"
+    effect = "Allow"
+    actions = [
+      "lambda:AddPermission",
+      "lambda:CreateFunction",
+      "lambda:GetFunction",
+      "lambda:InvokeFunction",
+      "lambda:UpdateFunctionConfiguration"
+    ]
+    resources = ["arn:aws:lambda:*:*:function:SecretsManager*"]
+  }
+}
+
+
+# policy for secret manager
+resource "aws_iam_policy" "load_lambda_secret_manager_policy" {
+  name_prefix = "secret_manager-policy-${var.load_lambda}"
+
+  policy = data.aws_iam_policy_document.load_lambda_secret_manager.json
+
+}
+
+# policy attachment to the role "iam_role_for_lambda"
+resource "aws_iam_policy_attachment" "load_lambda_secret_manager_policy_attachment" {
+  name       = "load-lambda-secret-manager-attachment"
+  roles      = [aws_iam_role.load_lambda_role.name]
+  policy_arn = aws_iam_policy.load_lambda_secret_manager_policy.arn
+}
