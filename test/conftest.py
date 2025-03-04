@@ -1,6 +1,136 @@
 import pytest
+from moto import mock_aws
+import boto3
+import os
+import json
 import pandas as pd
 
+@pytest.fixture(scope='function', autouse=True)
+def aws_credentials():
+    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
+    os.environ["AWS_SECURITY_TOKEN"] = "testing"
+    os.environ["AWS_SESSION_TOKEN"] = "testing"
+    os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
+
+@pytest.fixture()
+def s3_client():
+    with mock_aws():
+        yield boto3.client('s3', region_name="eu-west-2")
+
+@pytest.fixture()
+def bucket_name():
+    return 'test_bucket_ingestion'
+
+@pytest.fixture()
+def bucket_name_processed():
+    return 'test_bucket_processed'
+
+@pytest.fixture
+def create_bucket(s3_client, bucket_name):
+    s3_client.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={'LocationConstraint':'eu-west-2'})
+
+@pytest.fixture
+def create_bucket_processed(s3_client, bucket_name_processed):
+    s3_client.create_bucket(Bucket=bucket_name_processed, CreateBucketConfiguration={'LocationConstraint':'eu-west-2'})
+
+@pytest.fixture()
+def object_key():
+    return 'address/2025-03-01/071556.json'
+
+@pytest.fixture()
+def object_body():
+    return {
+    "columns": [
+        "department_id",
+        "department_name",
+        "location",
+        "manager",
+        "created_at",
+        "last_updated"
+    ],
+    "data": [
+        [
+            1,
+            "Sales",
+            "Manchester",
+            "Richard Roma",
+            "2022-11-03 14:20:49.962000",
+            "2022-11-03 14:20:49.962000"
+        ],
+        [
+            2,
+            "Purchasing",
+            "Manchester",
+            "Naomi Lapaglia",
+            "2022-11-03 14:20:49.962000",
+            "2022-11-03 14:20:49.962000"
+        ],
+        [
+            3,
+            "Production",
+            "Leeds",
+            "Chester Ming",
+            "2022-11-03 14:20:49.962000",
+            "2022-11-03 14:20:49.962000"
+        ] 
+    ]
+    }
+
+@pytest.fixture
+def create_object(s3_client, bucket_name, object_key, object_body):
+    obj_json = json.dumps(object_body, indent=4, sort_keys=True, default=str)
+    obj_bytes = obj_json.encode('utf-8')
+    s3_client.put_object(Bucket=bucket_name, Key=object_key, Body=obj_bytes)
+
+@pytest.fixture()
+def object_key_design():
+    return 'design/2025-03-03/131223.json'
+
+@pytest.fixture()
+def object_body_design():
+    return {
+    "columns": [
+        "design_id",
+        "created_at",
+        "design_name",
+        "file_location",
+        "file_name",
+        "last_updated"
+    ],
+    "data": [
+        [
+            8,
+            "2022-11-03 14:20:49.962000",
+            "Wooden",
+            "/usr",
+            "wooden-20220717-npgz.json",
+            "2022-11-03 14:20:49.962000"
+        ],
+        [
+            51,
+            "2023-01-12 18:50:09.935000",
+            "Bronze",
+            "/private",
+            "bronze-20221024-4dds.json",
+            "2023-01-12 18:50:09.935000"
+        ],
+        [
+            69,
+            "2023-02-07 17:31:10.093000",
+            "Bronze",
+            "/lost+found",
+            "bronze-20230102-r904.json",
+            "2023-02-07 17:31:10.093000"
+        ]
+    ]
+    }
+
+@pytest.fixture()
+def create_object_design(s3_client, bucket_name, object_key_design, object_body_design):
+    obj_json = json.dumps(object_body_design, indent=4, sort_keys=True, default=str)
+    obj_bytes = obj_json.encode('utf-8')
+    s3_client.put_object(Bucket=bucket_name, Key=object_key_design, Body=obj_bytes)
 
 @pytest.fixture(scope="module")
 def input_data_design():
@@ -201,6 +331,7 @@ def output_data_counterparty():
 @pytest.fixture(scope="module")
 def output_data_date():
     data = {
+        "date_id": ['2025-03-03','2025-03-04','2025-03-05'],
         "year": [2025, 2025, 2025],
         "month": [3, 3, 3],
         "day": [3, 4, 5],
@@ -210,7 +341,8 @@ def output_data_date():
         "quarter": [1, 1, 1],
     }
     df_date = pd.DataFrame(data=data)
-    df_date.index.name = "date_id"
+    df_date["date_id"] = pd.to_datetime(df_date['date_id']).dt.date
+
     return df_date
 
 
@@ -242,6 +374,7 @@ def input_data_sales_order():
         "agreed_delivery_location_id": [2345, 2, 5],
     }
     df_sales_order = pd.DataFrame(data=data)
+    
     return df_sales_order
 
 
