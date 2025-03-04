@@ -50,7 +50,6 @@ def create_dim_date_table(start='2019/01/01', end='2030/12/31'):
     '''
     # Construct DIM Date Dataframe
     df_date = pd.DataFrame({"Date": pd.date_range(start=f'{start}', end=f'{end}')})
-    # df_date.index.name = 'date_id'
     df_date["year"] = df_date.Date.dt.year
     df_date["month"] = df_date.Date.dt.month
     df_date["day"] = df_date.Date.dt.day
@@ -59,15 +58,15 @@ def create_dim_date_table(start='2019/01/01', end='2030/12/31'):
     df_date["month_name"] = df_date.Date.dt.month_name()
     df_date["quarter"] = df_date.Date.dt.quarter
     df_date_mod = df_date.rename(columns={'Date':'date_id'})
-    df_date_mod["date_id"] = pd.to_datetime(df_date_mod["date_id"]).dt.date
+    df_date_mod["date_id"] = pd.to_datetime(df_date_mod["date_id"]).dt.strftime('%Y-%m-%d')
     return df_date_mod
 
 def create_fact_sales_order_table(df_sales):
     df_sales_order = df_sales.copy()
-    df_sales_order["created_date"] = pd.to_datetime(df_sales_order["created_at"]).dt.date
-    df_sales_order["created_time"] = pd.to_datetime(df_sales_order["created_at"]).dt.time
-    df_sales_order["last_updated_date"] = pd.to_datetime(df_sales_order["last_updated"]).dt.date
-    df_sales_order["last_updated_time"] = pd.to_datetime(df_sales_order["last_updated"]).dt.time
+    df_sales_order["created_date"] = pd.to_datetime(df_sales_order["created_at"], format='ISO8601').dt.strftime('%Y-%m-%d')
+    df_sales_order["created_time"] = pd.to_datetime(df_sales_order["created_at"], format='ISO8601').dt.strftime('%H:%M:%S.%f')
+    df_sales_order["last_updated_date"] = pd.to_datetime(df_sales_order["last_updated"], format='ISO8601').dt.strftime('%Y-%m-%d')
+    df_sales_order["last_updated_time"] = pd.to_datetime(df_sales_order["last_updated"], format='ISO8601').dt.strftime('%H:%M:%S.%f')
     df_fact_sales_order = df_sales_order.drop(columns=['created_at','last_updated'])
     return df_fact_sales_order
 

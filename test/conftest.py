@@ -341,7 +341,6 @@ def output_data_date():
         "quarter": [1, 1, 1],
     }
     df_date = pd.DataFrame(data=data)
-    df_date["date_id"] = pd.to_datetime(df_date['date_id']).dt.date
 
     return df_date
 
@@ -397,8 +396,4 @@ def output_data_sales_order():
         "last_updated_time": ["14:20:49.962000", "14:20:49.962000", "14:20:49.962000"],
     }
     output_df_sales_order = pd.DataFrame(data=data)
-    output_df_sales_order["created_date"] = pd.to_datetime(output_df_sales_order['created_date']).dt.date
-    output_df_sales_order["created_time"] = pd.to_datetime(output_df_sales_order['created_time']).dt.time
-    output_df_sales_order["last_updated_date"] = pd.to_datetime(output_df_sales_order['last_updated_date']).dt.date
-    output_df_sales_order["last_updated_time"] = pd.to_datetime(output_df_sales_order['last_updated_time']).dt.time
     return output_df_sales_order
