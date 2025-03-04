@@ -63,7 +63,7 @@ def connect_to_db(secret_identifier="de_2024_12_02"):
     return Connection(
         user=credentials["username"],
         password=credentials["password"],
-        database=credentials["dbname"],
+        database=credentials["database"],
         host=credentials["host"],
     )
 
@@ -137,7 +137,7 @@ def fetch_latest_update_time_from_db(conn, table_name):
     """fetch the latest update of the table in db and return the latest update time as int."""
     query = f"SELECT last_updated FROM {table_name} ORDER BY last_updated DESC LIMIT 1;"
     raw_last_updated = conn.run(query)
+    print(raw_last_updated)
     last_updated_dt = raw_last_updated[0][0]
     formatted_res = int(last_updated_dt.strftime("%Y%m%d%H%M%S"))
     return formatted_res
-
