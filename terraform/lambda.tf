@@ -91,7 +91,7 @@ resource "aws_lambda_function" "transform_lambda" {
   handler          = "${var.transform_lambda}.lambda_handler"
   runtime          = var.python_runtime
   timeout          = var.default_timeout
-  layers           = [aws_lambda_layer_version.lambda_layer.arn]
+  layers           = [aws_lambda_layer_version.lambda_layer.arn, "arn:aws:lambda:eu-west-2:336392948345:layer:AWSSDKPandas-Python312:16"]
   depends_on       = [aws_s3_object.lambda_code, aws_s3_object.layer_code]
   environment {
     variables = {
