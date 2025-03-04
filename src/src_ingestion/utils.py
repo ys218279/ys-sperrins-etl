@@ -116,7 +116,7 @@ def upload_to_s3(bucket_name, table, result):
     s3_client = get_s3_client()
     y_m_d = datetime.now().strftime("%Y%m%d")
     filename = datetime.now().strftime("%H%M%S")
-    object_name = f"{table}/{y_m_d}{filename}"
+    object_name = f"{table}/{y_m_d}{filename}.json"
     s3_client.put_object(Body=res_bytes, Bucket=bucket_name, Key=object_name)
     return object_name
 
