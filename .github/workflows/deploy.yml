@@ -49,26 +49,26 @@ jobs:
       # terraform plan
       - name: Terraform plan 
         working-directory: terraform
-        run: terraform plan \
-          -var="a_totesys_username=${{ secrets.A_TOTESYS_USERNAME }}" \
-          -var="b_totesys_password=${{ secrets.B_TOTESYS_PASSWORD }}" \
-          -var="c_totesys_host=${{ secrets.C_TOTESYS_HOST }}" \
-          -var="d_totesys_database=${{ secrets.D_TOTESYS_DATABASE }}" \
-          -var="email_subscribed_to_sns=${{ secrets.EMAIL_SUBSCRIBED_TO_SNS }}" \
-          -var="e_finaldw_username=${{ secrets.E_FINALDW_USERNAME }}" \
-          -var="f_finaldw_password=${{ secrets.F_FINALDW_PASSWORD }}" \
-          -var="g_finaldw_host=${{ secrets.G_FINALDW_HOST }}" \
-          -var="h_finaldw_database=${{ secrets.H_FINALDW_DATABASE }}"
+        run: terraform plan\
+          -var="a_totesys_username=${{secrets.A_TOTESYS_USERNAME}}"\
+          -var="b_totesys_password=${{secrets.B_TOTESYS_PASSWORD}}"\
+          -var="c_totesys_host=${{secrets.C_TOTESYS_HOST}}"\
+          -var="d_totesys_database=${{secrets.D_TOTESYS_DATABASE}}"\
+          -var="email_subscribed_to_sns=${{secrets.EMAIL_SUBSCRIBED_TO_SNS}}"\
+          -var="e_finaldw_username=${{secrets.E_FINALDW_USERNAME}}" \
+          -var="f_finaldw_password=${{secrets.F_FINALDW_PASSWORD}}"\
+          -var="g_finaldw_host=${{secrets.G_FINALDW_HOST}}"\
+          -var="h_finaldw_database=${{secrets.H_FINALDW_DATABASE}}"
       # terraform apply and grab secrets
       - name: Terraform apply
         working-directory: terraform 
-        run: terraform apply -auto-approve \
-          -var="a_totesys_username=${{ secrets.A_TOTESYS_USERNAME }}" \
-          -var="b_totesys_password=${{ secrets.B_TOTESYS_PASSWORD }}" \
-          -var="c_totesys_host=${{ secrets.C_TOTESYS_HOST }}" \
-          -var="d_totesys_database=${{ secrets.D_TOTESYS_DATABASE }}" \
-          -var="email_subscribed_to_sns=${{ secrets.EMAIL_SUBSCRIBED_TO_SNS }}" \
-          -var="e_finaldw_username=${{ secrets.E_FINALDW_USERNAME }}" \
-          -var="f_finaldw_password=${{ secrets.F_FINALDW_PASSWORD }}" \
-          -var="g_finaldw_host=${{ secrets.G_FINALDW_HOST }}" \
-          -var="h_finaldw_database=${{ secrets.H_FINALDW_DATABASE }}"
+        run: terraform apply -auto-approve\
+          -var="a_totesys_username=${{secrets.A_TOTESYS_USERNAME}}"\
+          -var="b_totesys_password=${{secrets.B_TOTESYS_PASSWORD}}"\
+          -var="c_totesys_host=${{secrets.C_TOTESYS_HOST}}"\
+          -var="d_totesys_database=${{secrets.D_TOTESYS_DATABASE}}"\
+          -var="email_subscribed_to_sns=${{secrets.EMAIL_SUBSCRIBED_TO_SNS}}"\
+          -var="e_finaldw_username=${{secrets.E_FINALDW_USERNAME}}"\
+          -var="f_finaldw_password=${{secrets.F_FINALDW_PASSWORD}}"\
+          -var="g_finaldw_host=${{secrets.G_FINALDW_HOST}}"\
+          -var="h_finaldw_database=${{secrets.H_FINALDW_DATABASE}}"
