@@ -201,7 +201,7 @@ class TestUploadS3:
             bucket_name = "test-bucket"
             table = "table"
             result = {"key": "value"}
-            object_name = upload_to_s3(bucket_name, table, result)
+            object_name = upload_to_s3(bucket_name, table, result, client)
             # Verify the object was uploaded
             response = client.list_objects_v2(Bucket=bucket_name)
             assert "Contents" in response
@@ -211,6 +211,20 @@ class TestUploadS3:
             s3_object = client.get_object(Bucket=bucket_name, Key=object_name)
             content = json.loads(s3_object["Body"].read().decode("utf-8"))
             assert content == result
+    
+   
+    def test_upload_to_s3_client_error(self, caplog):
+        with mock_aws():
+            client = boto3.client("s3", region_name="eu-west-2")
+            bucket_name = "test-bucket"
+            table = "table"
+            result = {"key": "value"}
+            with caplog.at_level(logging.CRITICAL):
+                upload_to_s3(bucket_name, table, result, client)
+                assert "Unable to put" in caplog.text
+                assert "object in ingestion s3 bucket" in caplog.text
+        
+            
 
 
 class TestFetchLatestUpdateS3:
@@ -233,6 +247,27 @@ class TestFetchLatestUpdateS3:
                 fetch_latest_update_time_from_s3(client, bucket_name, "table")
                 == 20250302140516
             )
+    
+    def test_fetch_latest_time_from_s3_client_error(self, caplog):
+        with mock_aws():
+            client = boto3.client("s3", region_name="eu-west-2")
+            bucket_name = "test-bucket"
+            table = "table"
+            result = {"key": "value"}
+            with caplog.at_level(logging.ERROR):
+                fetch_latest_update_time_from_s3(client, bucket_name, table)
+                assert "Unable to connect to s3 ingestion bucket" in caplog.text
+
+    def test_fetch_latest_time_from_s3_critical_error(self, caplog):
+        with mock_aws():
+            client = boto3.client("secretsmanager", region_name="eu-west-2")
+            bucket_name = "test-bucket"
+            table = "table"
+            result = {"key": "value"}
+            with caplog.at_level(logging.CRITICAL):
+                fetch_latest_update_time_from_s3(client, bucket_name, table)
+                assert "Unable to return the time of the latest" in caplog.text
+                
 
 class TestFectchLatestUpdateDB:
     def test_fetch_latest_upload_when_s3_is_empty(self):
@@ -240,3 +275,11 @@ class TestFectchLatestUpdateDB:
         mock_conn.run.return_value = [[datetime.datetime(2022, 11, 3, 14, 20, 49, 962000)]]
         result = fetch_latest_update_time_from_db(mock_conn, "mock_table")
         assert result == 20221103142049
+   
+    def test_fetch_latest_time_from_db_critical(self, caplog):
+        with mock_aws():
+            conn = 'test'
+            table = 5
+            with caplog.at_level(logging.CRITICAL):
+                fetch_latest_update_time_from_db(conn, table)
+                assert "Unable to return the time of the latest" in caplog.text

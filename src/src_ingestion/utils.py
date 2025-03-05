@@ -128,14 +128,14 @@ def get_secrets_manager_client():
         )
 
 
-def upload_to_s3(bucket_name, table, result):
+def upload_to_s3(bucket_name, table, result, s3_client):
     """upload the file to s3 bucker and return the object name"""
     tmp_file_path = f"/tmp/{table}.json"
     try:
         with open(tmp_file_path, "w") as f:
             filedatain = json.dumps(result, indent=4, sort_keys=True, default=str)
             res_bytes = filedatain.encode("utf-8")
-        s3_client = get_s3_client()
+        
         y_m_d = datetime.now().strftime("%Y%m%d")
         filename = datetime.now().strftime("%H%M%S")
         object_name = f"{table}/{y_m_d}{filename}.json"
@@ -159,7 +159,7 @@ def fetch_latest_update_time_from_s3(client, bucket_name, table_name):
             return last_update
         return 20000101000001
     except ClientError as err:
-        logger.error("Unable to connect to s3 ingestion bucket, %s",  str(err))
+        logger.error("Unable to connect to s3 ingestion bucket to get latest loaded file, %s",  str(err))
     except Exception as err2:
         logger.critical("Unable to return the time of the latest loaded file %s to s3, %s", str(table_name),  str(err2))
 
@@ -172,8 +172,6 @@ def fetch_latest_update_time_from_db(conn, table_name):
         last_updated_dt = raw_last_updated[0][0]
         formatted_res = int(last_updated_dt.strftime("%Y%m%d%H%M%S"))
         return formatted_res
-    except DatabaseError as err:
-        logger.error("Unable to connect to totesys DB, %s",  str(err))
-    except Exception as err2:
-        logger.critical("Unable to return the time of the latest update of table %s, %s", str(table_name),  str(err2))
+    except Exception as err:
+        logger.critical("Unable to return the time of the latest update of table %s, %s", str(table_name),  str(err))
 

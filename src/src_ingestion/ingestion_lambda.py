@@ -63,7 +63,7 @@ def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
             )
             columns = [col["name"] for col in conn.columns]
             result = {"columns": columns, "data": raw_data}
-            object_name = upload_to_s3(BUCKET_NAME, table, result)
+            object_name = upload_to_s3(BUCKET_NAME, table, result, client)
             output[table] = object_name
         else:
             output[table] = False
