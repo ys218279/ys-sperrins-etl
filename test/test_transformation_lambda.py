@@ -15,11 +15,11 @@ class DummyContext:
 
 @pytest.fixture(scope="function")
 def lambda_event():
-    return {'department': False,
+    return {'department': 'department/2025-03-01/071556.json',
             'transaction': False,
             'payment': False,
             'design': 'design/2025-03-03/131223.json',
-            'address': 'address/2025-03-01/071556.json',
+            'address': False,
             'staff': False,
             'counterparty': False,
             'currency': False,
@@ -40,8 +40,9 @@ def test_handler_writes_objects_to_s3(lambda_event,
         context = DummyContext()
         lambda_handler(lambda_event, context)
         bucket_data = s3_client.list_objects_v2(Bucket="test_bucket_processed")
-        assert bucket_data['KeyCount'] == 3
-        assert bucket_data["Contents"][0]["Key"] == 'dim_date/2024-04-01/120000.json'
-        assert bucket_data["Contents"][1]["Key"] == 'dim_design/2024-04-01/120000.json'
-        assert bucket_data["Contents"][2]["Key"] == 'dim_location/2024-04-01/120000.json'
+        assert bucket_data['KeyCount'] == 2
+        assert bucket_data["Contents"][0]["Key"] == 'dim_date/2024-04-01/120000.parquet'
+        assert bucket_data["Contents"][1]["Key"] == 'dim_design/2024-04-01/120000.parquet'
+
+
 

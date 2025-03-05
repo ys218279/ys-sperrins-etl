@@ -1,7 +1,7 @@
 import pandas as pd
 import boto3
 import json
-from io import StringIO
+from io import BytesIO
 from botocore.exceptions import ClientError
 
 
@@ -26,9 +26,9 @@ def convert_s3_obj_to_df(s3_obj_dict):
     return df
 
 def convert_df_to_s3_obj(client, df, bucket, key):
-    json_buffer = StringIO()
-    df.to_json(json_buffer)
-    body = json_buffer.getvalue()
+    output_buffer = BytesIO()
+    df.to_parquet(output_buffer)
+    body = output_buffer.getvalue()
     client.put_object(Bucket=bucket, Key=key, Body=body)
 
 
