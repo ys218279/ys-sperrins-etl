@@ -16,5 +16,5 @@ venv/
 .pytest*
 .env
 terraform/.terraform**/** 
-
+**/*.tfvars*
 
