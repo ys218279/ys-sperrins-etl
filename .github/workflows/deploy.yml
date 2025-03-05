@@ -62,4 +62,13 @@ jobs:
       # terraform apply and grab secrets
       - name: Terraform apply
         working-directory: terraform 
-        run: terraform apply -auto-approve
+        run:
+          export TF_VAR_a_totesys_username=$TF_VAR_a_totesys_username
+          export TF_VAR_b_totesys_password=$TF_VAR_b_totesys_password
+          export TF_VAR_c_totesys_host=$TF_VAR_c_totesys_host
+          export TF_VAR_d_totesys_database=$TF_VAR_d_totesys_database
+          export TF_VAR_e_totesys_username=$TF_VAR_e_totesys_username
+          export TF_VAR_f_totesys_password=$TF_VAR_f_totesys_password
+          export TF_VAR_g_totesys_host=$TF_VAR_g_totesys_host
+          export TF_VAR_h_totesys_database=$TF_VAR_h_totesys_database 
+          terraform apply -auto-approve
