@@ -41,6 +41,9 @@ def retrieval(client, secret_identifier="de_2024_12_02"):
     Keyword arguments:
     - client (boto3.client): AWS secrets manager client
     - secret_identifier (str): Name of secret storing totesys credentials
+
+    Returns:
+    - res_dict (dict): returns secrets for the Totesys DB connection in dict format
     
     Exceptions raised:
     - ResourceNotFoundException: secret ID does not exist.
