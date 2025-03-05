@@ -1,1 +1,5 @@
 pg8000
+xmltodict==0.14.2
+freezegun
+pandas
+pyarrow
