@@ -45,7 +45,7 @@ jobs:
       # terraform plan
       - name: Terraform plan 
         working-directory: terraform
-        run: 
+        run: |
           export TF_VAR_a_totesys_username=$TF_VAR_a_totesys_username
           export TF_VAR_b_totesys_password=$TF_VAR_b_totesys_password
           export TF_VAR_c_totesys_host=$TF_VAR_c_totesys_host
@@ -62,7 +62,7 @@ jobs:
       # terraform apply and grab secrets
       - name: Terraform apply
         working-directory: terraform 
-        run:
+        run: |
           export TF_VAR_a_totesys_username=$TF_VAR_a_totesys_username
           export TF_VAR_b_totesys_password=$TF_VAR_b_totesys_password
           export TF_VAR_c_totesys_host=$TF_VAR_c_totesys_host
