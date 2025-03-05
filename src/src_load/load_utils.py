@@ -7,9 +7,8 @@ import sys
 import pyarrow.parquet as pa
 import pandas as pd
 import io
-
-
-sys.path.append("src/src_ingestion")
+import sys
+sys.path.append("src/src_load")
 
 
 # def entry(client):
@@ -135,10 +134,21 @@ def pd_read_s3_parquet(key, bucket, s3_client):
 #            for key in s3_keys]
 #     return dfs      
 
+def connet_to_dw(secret_identifier):
+    """return conn to totesys db"""
+    client = get_secrets_manager_client()
+    credentials = load_retrieval(client, secret_identifier=secret_identifier)
 
-def load_tables_to_dw(df, table_name):
-    conn = connect_to_db()
-    if table_name == 'fact_sales_order': 
+    return Connection(
+        user=credentials["username"],
+        password=credentials["password"],
+        database=credentials["database"],
+        host=credentials["host"],
+    )
+
+def load_tables_to_dw(df, table_name, fact_table):
+    conn = connet_to_dw(secret_identifier)
+    if table_name in fact_table: 
         df.to_sql(table_name, con=conn, if_exists='append',index=False)
     else:
         df.to_sql(table_name, con=conn, if_exists='replace',index=False)
