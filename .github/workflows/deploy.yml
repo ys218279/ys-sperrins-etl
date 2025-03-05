@@ -38,6 +38,10 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }} 
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      # terraform fmt
+      - name: Terraform format
+        working-directory: terraform
+        run: terraform fmt
       # terraform init
       - name: Terraform init 
         working-directory: terraform
@@ -55,11 +59,7 @@ jobs:
           TF_VAR_g_totesys_host: $G_FINALDW_HOST
           TF_VAR_h_totesys_database: $H_FINALDW_DATABASE
         run: terraform plan 
-      # terraform fmt
-      - name: Terraform format
-        working-directory: terraform
-        run: terraform fmt
       # terraform apply and grab secrets
       - name: Terraform apply
         working-directory: terraform 
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve 
