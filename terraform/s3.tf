@@ -17,7 +17,6 @@ resource "aws_s3_bucket" "processed_bucket" {
     Environment = var.Environment
   }
 }
-
 #======================================================================
 # this will be the naming scheme for bucket definintions moving forward
 # use Hyphens(-) not Underscore (_)
