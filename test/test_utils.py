@@ -6,6 +6,8 @@ from src.src_ingestion.utils import (
     fetch_latest_update_time_from_db,
     entry,
     retrieval,
+    connect_to_db,
+    close_db_connection
 )
 import boto3
 import unittest
@@ -14,9 +16,147 @@ from moto import mock_aws
 import json
 from botocore.exceptions import ClientError
 import io
-import os
-import pytest
+import logging
 import datetime
+from pg8000.native import Connection
+
+def input_args():
+    yield "bidenj"
+    yield "Pa55word"
+    yield "host"
+    yield "database"
+    yield "port"
+    yield "bidenj"
+    yield "Pa55word"
+    yield "host"
+    yield "database"
+    yield "port"
+
+
+def input_args_2():
+    yield "bidenj"
+    yield "Pa55word"
+    yield "host"
+    yield "database"
+    yield "port"
+    # yield "abc"
+    
+
+
+
+class TestEntry:
+    @patch("builtins.input", side_effect=input_args())
+    def test_entry_successful(self, mock_input):
+        with mock_aws():
+            client = boto3.client("secretsmanager", region_name="eu-west-2")
+            with patch("sys.stdout", new=io.StringIO()) as fake_out:
+                entry(client)
+                secret = client.get_secret_value(SecretId="de_2024_12_02")
+                assert secret is not None
+
+    @patch("builtins.input", side_effect=input_args())
+    def test_entry_fails(self, mock_input):
+        with mock_aws():
+            client = boto3.client("s3", region_name="eu-west-2")
+            with patch("sys.stdout", new=io.StringIO()) as fake_out:
+                entry(client)
+                result = fake_out.getvalue()
+                assert (
+                    "invalid client type used for secret manager! plz contact developer!"
+                    in result
+                )
+
+    @patch("builtins.input", side_effect=input_args())
+    def test_entry_successfully_stored(self, mock_input):
+        with mock_aws():
+            client = boto3.client("secretsmanager", region_name="eu-west-2")
+            entry(client)
+            response = client.list_secrets()
+            assert len(response["SecretList"]) == 1
+
+    @patch("builtins.input", side_effect=input_args())
+    def test_secret_already_exists(self, mock_input):
+        with mock_aws():
+            client = boto3.client("secretsmanager", region_name="eu-west-2")
+            entry(client)
+            with patch("sys.stdout", new=io.StringIO()) as fake_out:
+                entry(client)
+                result = fake_out.getvalue()
+                assert "Secret already exists!" in result
+
+
+class TestRetrieval:
+    @patch("builtins.input", side_effect=input_args())
+    def test_retrieval_successful_1_secret(self, mock_input):
+        mock_input.input_args = ["de_2024_12_02"]
+        with mock_aws():
+            client = boto3.client("secretsmanager", region_name="eu-west-2")
+            entry(client)
+            res = retrieval(client)
+            assert res is not None
+
+    @patch("builtins.input", side_effect=input_args())
+    def test_retrieval_successful_return_dict(self, mock_input):
+        with mock_aws():
+            client = boto3.client("secretsmanager", region_name="eu-west-2")
+            with patch("sys.stdout", new=io.StringIO()) as fake_out:
+                entry(client)
+                res = retrieval(client)
+                mock_input.input_args = ["de_2024_12_02"]
+                assert res == {
+                    "username": "bidenj",
+                    "password": "Pa55word",
+                    "host": "host",
+                    "database": "database",
+                    "port": "port",
+                }
+
+    @patch("builtins.input")
+    def test_retrieval_secret_doesnot_exist(self, mock_input):
+        with mock_aws():
+            client = boto3.client("secretsmanager", region_name="eu-west-2")
+            with patch("sys.stdout", new=io.StringIO()) as fake_out:
+                retrieval(client)
+                result = fake_out.getvalue()
+                assert (
+                    "An error occurred (ResourceNotFoundException) when calling the GetSecretValue operation"
+                    in result
+                )
+                
+    def test_retrieval_secret_resource_not_found_error_log(self, caplog):
+        with mock_aws():
+            with caplog.at_level(logging.WARNING):
+                client = boto3.client("secretsmanager", region_name="eu-west-2")
+                retrieval(client, "secret")
+                assert "Secret does not exist" in caplog.text
+        
+    def test_retrieval_secret_general_critical_log(self, caplog):
+        with mock_aws():
+            with caplog.at_level(logging.CRITICAL):
+                client = boto3.client("secretsmanager", region_name="eu-west-2")
+                retrieval(client, 11)
+                assert "There has been a critical error when attempting to retrieve secret for totesys DB credentials" in caplog.text
+
+
+class TestConnectToDB:
+    
+    @patch("builtins.input", side_effect=input_args_2())
+    def test_connect_to_db_DatabaseError(self, mock_input, caplog):
+        with mock_aws():
+            with caplog.at_level(logging.CRITICAL):
+                with patch("sys.stdout", new=io.StringIO()) as fake_out:
+                    connect_to_db("test")
+                    assert "The connection to the totesys DB is failing" in caplog.text
+                    
+class TestCloseDBConnection:
+    def test_close_db_connection_exception(self, caplog):
+        with mock_aws():
+            with caplog.at_level(logging.WARNING):
+                connection = "test"
+                close_db_connection(connection)
+                assert "The connection to the totesys DB is not able to close" in caplog.text
+                
+                    
 
 class TestGetS3Client(unittest.TestCase):
     def test_get_s3_client_success(self):
@@ -100,104 +240,3 @@ class TestFectchLatestUpdateDB:
         mock_conn.run.return_value = [[datetime.datetime(2022, 11, 3, 14, 20, 49, 962000)]]
         result = fetch_latest_update_time_from_db(mock_conn, "mock_table")
         assert result == 20221103142049
-
-def input_args():
-    yield "bidenj"
-    yield "Pa55word"
-    yield "host"
-    yield "database"
-    yield "port"
-    yield "bidenj"
-    yield "Pa55word"
-    yield "host"
-    yield "database"
-    yield "port"
-
-
-def input_args_2():
-    yield "bidenj"
-    yield "Pa55word"
-    yield "host"
-    yield "database"
-    yield "port"
-    yield "abc"
-
-
-class TestEntry:
-    @patch("builtins.input", side_effect=input_args())
-    def test_entry_successful(self, mock_input):
-        with mock_aws():
-            client = boto3.client("secretsmanager", region_name="eu-west-2")
-            with patch("sys.stdout", new=io.StringIO()) as fake_out:
-                entry(client)
-                secret = client.get_secret_value(SecretId="de_2024_12_02")
-                assert secret is not None
-
-    @patch("builtins.input", side_effect=input_args())
-    def test_entry_fails(self, mock_input):
-        with mock_aws():
-            client = boto3.client("s3", region_name="eu-west-2")
-            with patch("sys.stdout", new=io.StringIO()) as fake_out:
-                entry(client)
-                result = fake_out.getvalue()
-                assert (
-                    "invalid client type used for secret manager! plz contact developer!"
-                    in result
-                )
-
-    @patch("builtins.input", side_effect=input_args())
-    def test_entry_successfully_stored(self, mock_input):
-        with mock_aws():
-            client = boto3.client("secretsmanager", region_name="eu-west-2")
-            entry(client)
-            response = client.list_secrets()
-            assert len(response["SecretList"]) == 1
-
-    @patch("builtins.input", side_effect=input_args())
-    def test_secret_already_exists(self, mock_input):
-        with mock_aws():
-            client = boto3.client("secretsmanager", region_name="eu-west-2")
-            entry(client)
-            with patch("sys.stdout", new=io.StringIO()) as fake_out:
-                entry(client)
-                result = fake_out.getvalue()
-                assert "Secret already exists!" in result
-
-
-class TestRetrieval:
-    @patch("builtins.input", side_effect=input_args())
-    def test_retrieval_successful_1_secret(self, mock_input):
-        mock_input.input_args = ["de_2024_12_02"]
-        with mock_aws():
-            client = boto3.client("secretsmanager", region_name="eu-west-2")
-            entry(client)
-            res = retrieval(client)
-            assert res is not None
-
-    @patch("builtins.input", side_effect=input_args())
-    def test_retrieval_successful_return_dict(self, mock_input):
-        with mock_aws():
-            client = boto3.client("secretsmanager", region_name="eu-west-2")
-            with patch("sys.stdout", new=io.StringIO()) as fake_out:
-                entry(client)
-                res = retrieval(client)
-                mock_input.input_args = ["de_2024_12_02"]
-                assert res == {
-                    "username": "bidenj",
-                    "password": "Pa55word",
-                    "host": "host",
-                    "database": "database",
-                    "port": "port",
-                }
-
-    @patch("builtins.input")
-    def test_retrieval_secret_doesnot_exist(self, mock_input):
-        with mock_aws():
-            client = boto3.client("secretsmanager", region_name="eu-west-2")
-            with patch("sys.stdout", new=io.StringIO()) as fake_out:
-                retrieval(client)
-                result = fake_out.getvalue()
-                assert (
-                    "An error occurred (ResourceNotFoundException) when calling the GetSecretValue operation"
-                    in result
-                )

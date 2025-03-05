@@ -2,11 +2,22 @@ import boto3
 from botocore.exceptions import ClientError
 import json
 from datetime import datetime
-from pg8000.native import Connection
+from pg8000.native import Connection, DatabaseError, InterfaceError
 import sys
+import logging
 
 sys.path.append("src/src_ingestion")
 
+'''
+INFO
+DEBUG
+WARNING
+ERROR
+CRITICAL
+'''
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 def entry(client):
     """will only be used once to create the initial secret that will store the totesys DB credentials"""
@@ -45,32 +56,40 @@ def retrieval(client, secret_identifier="de_2024_12_02"):
             return res_dict
         except client.exceptions.ResourceNotFoundException as err:
             print(err)
+            logger.warning("Secret does not exist, %s", str(err))
         except Exception as err:
-            print({"ERROR": err, "massage": "Fail to connect to aws secret manager!"})
+            print({"CRITICAL": err, "message": "Fail to connect to aws secret manager!"})
+            logger.critical("There has been a critical error when attempting to retrieve secret for totesys DB credentials, %s", str(err))
     else:
         print("invalid client type used for secret manager! plz contact developer!")
 
 
 def connect_to_db(secret_identifier="de_2024_12_02"):
     """return conn to totesys db"""
-    client = get_secrets_manager_client()
-    credentials = retrieval(client, secret_identifier=secret_identifier)
+    try:
+        client = get_secrets_manager_client()
+        credentials = retrieval(client, secret_identifier=secret_identifier)
 
-    if not credentials:
-        entry(client)
-        credentials = retrieval(client)
-
-    return Connection(
-        user=credentials["username"],
-        password=credentials["password"],
-        database=credentials["database"],
-        host=credentials["host"],
-    )
+        if not credentials:
+            entry(client)
+            credentials = retrieval(client)
+            
+        return Connection(
+            user=credentials["username"],
+            password=credentials["password"],
+            database=credentials["database"],
+            host=credentials["host"],
+        )
+    except InterfaceError as err:
+        logger.critical("The connection to the totesys DB is failing, %s", str(err))
 
 
 def close_db_connection(conn):
     """close db"""
-    conn.close()
+    try:
+        conn.close()
+    except Exception as err:
+        logger.warning("The connection to the totesys DB is not able to close, %s", str(err))
 
 
 def get_s3_client():
@@ -78,7 +97,8 @@ def get_s3_client():
     try:
         client = boto3.client("s3", region_name="eu-west-2")
         return client
-    except ClientError:
+    except ClientError as err:
+        logger.error("Unable to create s3 client, %s",  str(err))
         raise ClientError(
             {
                 "Error": {
@@ -95,7 +115,8 @@ def get_secrets_manager_client():
     try:
         client = boto3.client("secretsmanager", region_name="eu-west-2")
         return client
-    except ClientError:
+    except ClientError as err:
+        logger.error("Unable to create secrets manager client, %s",  str(err))
         raise ClientError(
             {
                 "Error": {
@@ -110,34 +131,49 @@ def get_secrets_manager_client():
 def upload_to_s3(bucket_name, table, result):
     """upload the file to s3 bucker and return the object name"""
     tmp_file_path = f"/tmp/{table}.json"
-    with open(tmp_file_path, "w") as f:
-        filedatain = json.dumps(result, indent=4, sort_keys=True, default=str)
-        res_bytes = filedatain.encode("utf-8")
-    s3_client = get_s3_client()
-    y_m_d = datetime.now().strftime("%Y%m%d")
-    filename = datetime.now().strftime("%H%M%S")
-    object_name = f"{table}/{y_m_d}{filename}.json"
-    s3_client.put_object(Body=res_bytes, Bucket=bucket_name, Key=object_name)
-    return object_name
+    try:
+        with open(tmp_file_path, "w") as f:
+            filedatain = json.dumps(result, indent=4, sort_keys=True, default=str)
+            res_bytes = filedatain.encode("utf-8")
+        s3_client = get_s3_client()
+        y_m_d = datetime.now().strftime("%Y%m%d")
+        filename = datetime.now().strftime("%H%M%S")
+        object_name = f"{table}/{y_m_d}{filename}.json"
+        s3_client.put_object(Body=res_bytes, Bucket=bucket_name, Key=object_name)
+        return object_name
+    except ClientError as err:
+        logger.critical("Unable to put %s object in ingestion s3 bucket , %s", str(table), str(err))
+    
 
 def fetch_latest_update_time_from_s3(client, bucket_name, table_name):
     """fetch the latest time of the file being loaded to s3 bucket and return the latest upload time as int."""
-    response = client.list_objects_v2(Bucket=bucket_name, Prefix=table_name + "/")
-    raw_all_updates = response.get("Contents", [])
-    if raw_all_updates:
-        all_tables = [update["Key"].split("/")[0] for update in raw_all_updates]
-        if table_name not in all_tables:
-            return 20000101000001
-        all_updates = [update["Key"].split("/")[-1][:-5] for update in raw_all_updates]
-        last_update = max(list(map(int, all_updates)))
-        return last_update
-    return 20000101000001
+    try:   
+        response = client.list_objects_v2(Bucket=bucket_name, Prefix=table_name + "/")
+        raw_all_updates = response.get("Contents", [])
+        if raw_all_updates:
+            all_tables = [update["Key"].split("/")[0] for update in raw_all_updates]
+            if table_name not in all_tables:
+                return 20000101000001
+            all_updates = [update["Key"].split("/")[-1][:-5] for update in raw_all_updates]
+            last_update = max(list(map(int, all_updates)))
+            return last_update
+        return 20000101000001
+    except ClientError as err:
+        logger.error("Unable to connect to s3 ingestion bucket, %s",  str(err))
+    except Exception as err2:
+        logger.critical("Unable to return the time of the latest loaded file %s to s3, %s", str(table_name),  str(err2))
 
 def fetch_latest_update_time_from_db(conn, table_name):
     """fetch the latest update of the table in db and return the latest update time as int."""
-    query = f"SELECT last_updated FROM {table_name} ORDER BY last_updated DESC LIMIT 1;"
-    raw_last_updated = conn.run(query)
-    print(raw_last_updated)
-    last_updated_dt = raw_last_updated[0][0]
-    formatted_res = int(last_updated_dt.strftime("%Y%m%d%H%M%S"))
-    return formatted_res
+    try:
+        query = f"SELECT last_updated FROM {table_name} ORDER BY last_updated DESC LIMIT 1;"
+        raw_last_updated = conn.run(query)
+        print(raw_last_updated)
+        last_updated_dt = raw_last_updated[0][0]
+        formatted_res = int(last_updated_dt.strftime("%Y%m%d%H%M%S"))
+        return formatted_res
+    except DatabaseError as err:
+        logger.error("Unable to connect to totesys DB, %s",  str(err))
+    except Exception as err2:
+        logger.critical("Unable to return the time of the latest update of table %s, %s", str(table_name),  str(err2))
+
