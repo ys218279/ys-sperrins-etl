@@ -450,7 +450,7 @@ resource "aws_iam_role_policy_attachment" "eventbridge_policy_attachment" {
 */
 
 #load lambda policy document for secret manager
-data "aws_iam_policy_document" "load_lambda_secrets_manager" {
+data "aws_iam_policy_document" "load_lambda_secret_manager" {
   statement {
     sid    = "BasePermissions"
     effect = "Allow"
