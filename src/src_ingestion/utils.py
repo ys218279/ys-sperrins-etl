@@ -8,10 +8,10 @@ import sys
 sys.path.append("src/src_ingestion")
 
 
-def entry(client):
+def entry(client,secret_identifier = "de_2024_12_02"):
     """will only be used once to create the initial secret that will store the totesys DB credentials"""
     if "SecretsManager" in str(type(client)):
-        secret_identifier = "de_2024_12_02"
+        # secret_identifier = "de_2024_12_02"
         get_username = input("Please enter your username: ")
         get_password = input("Please enter your password:")
         get_host = input("Please enter your host: ")
