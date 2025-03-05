@@ -4,9 +4,13 @@ from src.src_ingestion.utils import (
     upload_to_s3,
     fetch_latest_update_time_from_s3,
     fetch_latest_update_time_from_db,
-    entry,
     retrieval,
 )
+
+from src.src_load.utils import (
+    load_retrieval
+)
+
 import boto3
 import unittest
 from unittest.mock import patch, Mock
@@ -174,7 +178,7 @@ class TestRetrieval:
             res = retrieval(client)
             assert res is not None
 
-    @patch("builtins.input", side_effect=input_args())
+    @patch("builtins.input")
     def test_retrieval_successful_return_dict(self, mock_input):
         with mock_aws():
             client = boto3.client("secretsmanager", region_name="eu-west-2")
@@ -183,11 +187,11 @@ class TestRetrieval:
                 res = retrieval(client)
                 mock_input.input_args = ["de_2024_12_02"]
                 assert res == {
-                    "username": "bidenj",
-                    "password": "Pa55word",
-                    "host": "host",
-                    "database": "database",
-                    "port": "port",
+                    "username": "test",
+                    "password": "test",
+                    "host": "test",
+                    "database": "test",
+                    "port": "test",
                 }
 
     @patch("builtins.input")
@@ -196,6 +200,72 @@ class TestRetrieval:
             client = boto3.client("secretsmanager", region_name="eu-west-2")
             with patch("sys.stdout", new=io.StringIO()) as fake_out:
                 retrieval(client)
+                result = fake_out.getvalue()
+                assert (
+                    "An error occurred (ResourceNotFoundException) when calling the GetSecretValue operation"
+                    in result
+                )
+
+
+def entry(client,secret_identifier = "de_2024_12_02"):
+    """will only be used once to create the initial TEST secret"""
+    if "SecretsManager" in str(type(client)):
+        # secret_identifier = "de_2024_12_02"
+        get_username = "test"
+        get_password = "test"
+        get_host = "test"
+        get_database = "test"
+        get_port = "test"
+        secret_value = {
+            "username": get_username,
+            "password": get_password,
+            "host": get_host,
+            "database": get_database,
+            "port": get_port,
+        }
+        secret_string = json.dumps(secret_value)
+        try:
+            client.create_secret(Name=secret_identifier, SecretString=secret_string)
+            print("Secret saved.")
+        except client.exceptions.ResourceExistsException as e:
+            print("Secret already exists!")
+        except Exception as err:
+            print({"ERROR": err, "message": "Fail to connect to aws secret manager!"})
+    else:
+        print("invalid client type used for secret manager! plz contact developer!")
+
+class TestLoadLambdaRetrieval:
+    @patch("builtins.input", side_effect=input_args())
+    def test_load_retrieval_successfully_gets_a_secret(self, mock_input):
+        mock_input.input_args = ["fake_db"]
+        with mock_aws():
+            client = boto3.client("secretsmanager", region_name="eu-west-2")
+            entry(client,secret_identifier="totesys_data_warehouse_olap")
+            res = load_retrieval(client)
+            assert res is not None
+
+    @patch("builtins.input")
+    def test_load_retrieval_successful_return_dict(self,mock_input):
+        with mock_aws():
+            client = boto3.client("secretsmanager", region_name="eu-west-2")
+            with patch("sys.stdout", new=io.StringIO()):
+                entry(client,secret_identifier="totesys_data_warehouse_olap")
+                res = load_retrieval(client)
+                mock_input.input_args = ["fake_tote_dw"]
+                assert res == {
+                    "username": "test",
+                    "password": "test",
+                    "host": "test",
+                    "database": "test",
+                    "port": "test",
+                }
+
+    @patch("builtins.input")
+    def test_load_retrieval_secret_doesnot_exist(self, mock_input):
+        with mock_aws():
+            client = boto3.client("secretsmanager", region_name="eu-west-2")
+            with patch("sys.stdout", new=io.StringIO()) as fake_out:
+                load_retrieval(client)
                 result = fake_out.getvalue()
                 assert (
                     "An error occurred (ResourceNotFoundException) when calling the GetSecretValue operation"

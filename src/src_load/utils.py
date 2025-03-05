@@ -1,7 +1,7 @@
 import boto3, json
 from botocore.exceptions import ClientError
 
-def retrieval(client, secret_identifier="totesys_data_warehouse_olap"):
+def load_retrieval(client, secret_identifier="totesys_data_warehouse_olap"):
     """Return the credentials to the final Data Warehouse as a dictionary.
     
     Required input arguments:
@@ -23,9 +23,7 @@ def retrieval(client, secret_identifier="totesys_data_warehouse_olap"):
     except client.exceptions.ResourceNotFoundException as err:
         print(err)
         # call sns publish here.
-        raise err
     except ClientError as err:
         print({"ERROR": err, "message": "AWS Error detected and logged!"})
         # call sns publish here.
-        raise err
     
