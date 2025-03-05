@@ -15,19 +15,19 @@ PROCESSED_BUCKET_NAME = os.environ["S3_BUCKET_NAME_PROCESSED"]
 
 def lambda_handler(event,context):
     """Main handler - This transforms the data from the ingestion s3 bucket, into the
-                    required schema for the Data Warehouse, before converting back to JSON
+                    required schema for the Data Warehouse, before converting to parquet
                     and putting in processed s3 bucket.
       Args:
-            Event: {'department': 'department/2025-03-03/131224.json',
-                    'transaction': 'transaction/2025-03-03/131223.json',
+            Event: {'department': 'department/20250303131224.json',
+                    'transaction': 'transaction/20250303131223.json',
                      'payment': False ...}
                         event is a dictionary that is passed in by StateMachine payload 
                         with table names as keys, and object keys as values (False if no new table).
             Context: supplied by AWS
         
         Returns:
-        dictionary e.g. {'dim_staff': 'dim_staff/2025-03-03/131224.json',
-                         'dim_currency': 'dim_currency/2025-03-03/131223.json',
+        dictionary e.g. {'dim_staff': 'dim_staff/2025-03-03/131224.parquet',
+                         'dim_currency': 'dim_currency/2025-03-03/131223.parquet',
                           'dim_staff' : False ...}
         }"""
     
