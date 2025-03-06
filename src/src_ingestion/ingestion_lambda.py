@@ -8,6 +8,7 @@ from utils import (
     fetch_latest_update_time_from_db,
     connect_to_db,
     close_db_connection,
+    fetch_snapshot_of_table_from_db,
 )
 import sys
 
@@ -67,5 +68,19 @@ def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
             output[table] = object_name
         else:
             output[table] = False
+
+    # Fetch full snapshot for cases where a table in DW needs a join, so it needs data from its counterpart table 
+    table_joins_lookup = {'staff':'department', 
+                          'department':'staff', 
+                          'counterparty':'address', 
+                          'address':'counterparty'}
+    list_tables_needed = [value for key,value in table_joins_lookup.items() if output[key]]
+    
+    for table_name in list_tables_needed:
+        result = fetch_snapshot_of_table_from_db(conn, table_name)
+        object_name = upload_to_s3(BUCKET_NAME, table_name, result)
+        output[table_name] = object_name
+
+
     close_db_connection(conn)
     return output
