@@ -62,7 +62,7 @@ class TestUploadS3:
             bucket_name = "test-bucket"
             table = "table"
             result = {"key": "value"}
-            object_name = upload_to_s3(bucket_name, table, result)
+            object_name = upload_to_s3(bucket_name, table, result, client)
             # Verify the object was uploaded
             response = client.list_objects_v2(Bucket=bucket_name)
             assert "Contents" in response

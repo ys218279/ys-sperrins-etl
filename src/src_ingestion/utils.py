@@ -141,7 +141,7 @@ def get_secrets_manager_client():
         )
 
 
-def upload_to_s3(bucket_name, table, result):
+def upload_to_s3(bucket_name, table, result, s3_client):
     """Upload the file to s3 bucket, returns the object name
 
     Keyword arguments:
@@ -156,7 +156,6 @@ def upload_to_s3(bucket_name, table, result):
     with open(tmp_file_path, "w") as f:
         filedatain = json.dumps(result, indent=4, sort_keys=True, default=str)
         res_bytes = filedatain.encode("utf-8")
-    s3_client = get_s3_client()
     y_m_d = datetime.now().strftime("%Y%m%d")
     filename = datetime.now().strftime("%H%M%S")
     object_name = f"{table}/{y_m_d}{filename}.json"
