@@ -9,7 +9,7 @@ variable "ingestion_bucket_prefix" {
 
 }
 
-variable "Environment" {
+variable "environment" {
   description = "The enviroment tag for AWS resources"
   type        = string
   default     = "dev"
