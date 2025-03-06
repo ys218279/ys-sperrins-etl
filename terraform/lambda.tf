@@ -61,6 +61,27 @@ resource "aws_lambda_layer_version" "lambda_layer" {
   s3_key              = aws_s3_object.layer_code.key
 }
 
+# this creates the lambda zip file for the custom psycopg2 layer
+# "python3 -m pip install --platform=manylinux1_x86_64 --only-binary=:all: psycopg2-binary -t ${path.module}/../layer_psycopg2"
+
+data "archive_file" "layer_psycopg2" {
+  type             = "zip"
+  output_file_mode = "0666"
+  source_dir       = "${path.module}/../layer_psycopg2"
+  output_path      = "${path.module}/../packages/layers_psycopg2/layer.zip"
+}
+
+resource "aws_s3_object" "layer_code_psycopg2" {
+  bucket = aws_s3_bucket.code_bucket.bucket
+  key    = "layer_psycopg2/layer.zip"
+  source = data.archive_file.layer_psycopg2.output_path
+}
+resource "aws_lambda_layer_version" "lambda_layer_psycopg2" {
+  layer_name          = "lambda_layer_psycopg2"
+  compatible_runtimes = [var.python_runtime]
+  s3_bucket           = aws_s3_bucket.code_bucket.id
+  s3_key              = aws_s3_object.layer_code_psycopg2.key
+}
 
 # creates the 3 lambda resources
 
@@ -110,7 +131,9 @@ resource "aws_lambda_function" "load_lambda" {
   handler          = "${var.load_lambda}.lambda_handler"
   runtime          = var.python_runtime
   timeout          = var.default_timeout
-  layers           = [aws_lambda_layer_version.lambda_layer.arn, "arn:aws:lambda:eu-west-2:336392948345:layer:AWSSDKPandas-Python312:16"]
+  layers           = [aws_lambda_layer_version.lambda_layer.arn, 
+                      aws_lambda_layer_version.lambda_layer_psycopg2.arn,
+                      "arn:aws:lambda:eu-west-2:336392948345:layer:AWSSDKPandas-Python312:16"]
   depends_on       = [aws_s3_object.lambda_code, aws_s3_object.layer_code]
   environment {
     variables = {
