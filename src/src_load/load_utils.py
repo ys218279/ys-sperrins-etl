@@ -9,6 +9,7 @@ import pandas as pd
 import io
 from typing import List
 import sys
+from sqlalchemy import create_engine
 
 sys.path.append("src/src_load")
 
@@ -26,24 +27,6 @@ def retrieval(client, secret_identifier='de_2024_12_02_dw'):
             print({"ERROR": err, "massage": "Fail to connect to aws secret manager!"})
     else:
         print("invalid client type used for secret manager! plz contact developer!")
-
-
-def connect_to_db(secret_identifier='de_2024_12_02_dw'):
-    """return conn to totesys db"""
-    client = get_secrets_manager_client()
-    credentials = retrieval(client, secret_identifier=secret_identifier)
-    return Connection(
-        user=credentials["username"],
-        password=credentials["password"],
-        database=credentials["database"],
-        host=credentials["host"],
-    )
-
-
-def close_db_connection(conn):
-    """close db"""
-    conn.close()
-
 
 def get_s3_client():
     """return a client to connect to s3"""
@@ -88,7 +71,6 @@ def connect_to_dw(secret_identifier='de_2024_12_02_dw'):
     """return conn to dw"""
     client = get_secrets_manager_client()
     credentials = retrieval(client, secret_identifier=secret_identifier)
-
     return Connection(
         user=credentials["username"],
         password=credentials["password"],
@@ -96,14 +78,25 @@ def connect_to_dw(secret_identifier='de_2024_12_02_dw'):
         host=credentials["host"],
     )
 
-def load_tables_to_dw(df, table_name, fact_tables, dim_tables):
-    conn = connect_to_dw()
-    if table_name in fact_tables: 
-        df.to_sql(table_name, con=conn, if_exists='append',index=False)
+def generate_conn_dw_engine():
+    client = get_secrets_manager_client()
+    credentials = retrieval(client)
+    engine = create_engine(f'postgresql://{credentials["username"]}:{credentials["password"]}@{credentials["host"]}:5432/{credentials["dbname"]}')
+    return engine
+
+def close_dw_connection(conn):
+    """close dw"""
+    conn.close()
+
+def load_tables_to_dw(conn, df, table_name, fact_tables, dim_tables):
+    # engine = create_engine('postgresql://username:password@localhost:5432/postgres')
+    engine = generate_conn_dw_engine()
+    if table_name in fact_tables:
+        df.to_sql(table_name, con=engine, if_exists='append',index=False)
     elif table_name in dim_tables:
-        check_empty_table = conn.run('SELECT * FROM :table;', table=table_name)
+        check_empty_table = conn.run(f'SELECT * FROM {identifier(table_name)};')
         if not check_empty_table:
-            df.to_sql(table_name, con=conn, if_exists='append',index=False)
+            df.to_sql(table_name, con=engine, if_exists='append',index=False)
         column_names = get_column_names(conn, table_name)
         update_query = get_update_query(table_name, column_names)
         rows = [row for row in df.itertuples(index=False, name=None)]
@@ -115,12 +108,12 @@ def get_update_query(table_name, column_names):
     conflict_column = column_names[0]  
     placeholders = ", ".join(["%s"] * len(column_names))
     columns = ", ".join(column_names)
-    update_set = ", ".join([f"{identifier(col)} = EXCLUDED.{identifier(col)}" for col in column_names[1:]])
+    update_set = ", ".join([f"{col} = EXCLUDED.{col}" for col in column_names[1:]])
     query = f"""
-    INSERT INTO {table_name} ({columns})
-    VALUES ({placeholders})
-    ON CONFLICT ({conflict_column})
-    DO UPDATE SET {update_set}
+    INSERT INTO {identifier(table_name)} ({identifier(columns)})
+    VALUES ({identifier(placeholders)})
+    ON CONFLICT ({identifier(conflict_column)})
+    DO UPDATE SET {identifier(update_set)}
     """
     return query
 
@@ -128,7 +121,24 @@ def get_column_names(conn, table_name: str) -> List[str]:
     query = f"""
         SELECT column_name 
         FROM information_schema.columns 
-        WHERE table_name = :table_name
+        WHERE table_name = :table
     """
-    result = conn.run(query, table_name=table_name)
+    result = conn.run(query, table=table_name)
     return [row[0] for row in result]
+
+def delete_all_from_dw():
+    conn = connect_to_dw()
+    tables = ['dim_date', 'dim_staff', 'dim_counterparty', 'dim_location', 'dim_currency', 'dim_design', 'fact_sales_order']
+    for table in tables:
+        query = f"DELETE FROM {identifier(table)};"
+        conn.run(query)
+
+# if __name__ == "__main__":
+    # data = {'currency_id':[1, 2], 'currency_code':[1, 2], "currency_name": [1, 2]}
+    # df = pd.DataFrame(data)
+    # engine = generate_conn_dw_engine()
+    # df.to_sql('dim_currency', con=engine, if_exists='append',index=False)
+    # delete_all_from_dw()
+
+
+
