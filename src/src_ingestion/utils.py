@@ -8,14 +8,6 @@ import logging
 
 sys.path.append("src/src_ingestion")
 
-'''
-INFO
-DEBUG
-WARNING
-ERROR
-CRITICAL
-'''
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
