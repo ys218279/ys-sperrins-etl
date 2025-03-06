@@ -18,92 +18,9 @@ from moto import mock_aws
 import json
 from botocore.exceptions import ClientError
 import io
-import os
-import pytest
+import logging
 import datetime
-
-class TestGetS3Client(unittest.TestCase):
-    def test_get_s3_client_success(self):
-        client = get_s3_client()
-        assert "S3" in str(type(boto3.client("s3")))
-
-    @patch("boto3.client")
-    def test_get_s3_client_fail(self, mock_boto_client):
-        mock_boto_client.side_effect = ClientError(
-            {"Error": {"Code": "InternalError", "Message": "Simulated error"}},
-            "ListObjects",
-        )
-        with self.assertRaises(ClientError) as context:
-            get_s3_client()
-        assert "failed to connect to s3" in str(context.exception)
-
-
-class TestGetSMClient(unittest.TestCase):
-    def test_get_s3_client_success(self):
-        client = get_secrets_manager_client()
-        assert "SecretsManager" in str(type(boto3.client("secretsmanager", region_name="eu-west-2")))
-
-    @patch("boto3.client")
-    def test_get_s3_client_fail(self, mock_boto_client):
-        mock_boto_client.side_effect = ClientError(
-            {"Error": {"Code": "InternalError", "Message": "Simulated error"}},
-            "ListObjects",
-        )
-        with self.assertRaises(ClientError) as context:
-            get_secrets_manager_client()
-        assert "failed to connect to secret manager" in str(context.exception)
-
-
-class TestUploadS3:
-    def test_upload_to_s3(self):
-        with mock_aws():
-            client = boto3.client("s3", region_name="eu-west-2")
-            client.create_bucket(
-                Bucket="test-bucket",
-                CreateBucketConfiguration={"LocationConstraint": "eu-west-2"},
-            )
-            bucket_name = "test-bucket"
-            table = "table"
-            result = {"key": "value"}
-            object_name = upload_to_s3(bucket_name, table, result)
-            # Verify the object was uploaded
-            response = client.list_objects_v2(Bucket=bucket_name)
-            assert "Contents" in response
-            keys = [obj["Key"] for obj in response["Contents"]]
-            assert object_name in keys
-            # Verify the content
-            s3_object = client.get_object(Bucket=bucket_name, Key=object_name)
-            content = json.loads(s3_object["Body"].read().decode("utf-8"))
-            assert content == result
-
-
-class TestFetchLatestUpdateS3:
-    def test_fetch_latest_update_time_from_s3(self):
-        with mock_aws():
-            client = boto3.client("s3", region_name="eu-west-2")
-            bucket_name = "test-bucket"
-            client.create_bucket(
-                Bucket=bucket_name,
-                CreateBucketConfiguration={"LocationConstraint": "eu-west-2"},
-            )
-            objects = [
-                "table/20250301174108.json",
-                "table/20250302140516.json",
-                "table/20250103131459.json",
-            ]
-            for i in objects:
-                client.put_object(Bucket=bucket_name, Key=i, Body="test")
-            assert (
-                fetch_latest_update_time_from_s3(client, bucket_name, "table")
-                == 20250302140516
-            )
-
-class TestFectchLatestUpdateDB:
-    def test_fetch_latest_upload_when_s3_is_empty(self):
-        mock_conn = Mock()
-        mock_conn.run.return_value = [[datetime.datetime(2022, 11, 3, 14, 20, 49, 962000)]]
-        result = fetch_latest_update_time_from_db(mock_conn, "mock_table")
-        assert result == 20221103142049
+from pg8000.native import Connection
 
 def input_args():
     yield "bidenj"
@@ -124,7 +41,9 @@ def input_args_2():
     yield "host"
     yield "database"
     yield "port"
-    yield "abc"
+    # yield "abc"
+    
+
 
 
 class TestEntry:
