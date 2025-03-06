@@ -66,7 +66,6 @@ variable "lambda_ingestion_topic_name" {
 
 variable "email_address" {
   description = "value of email used to subscribe to sns"
-  //we are using a fake temp email service to set as a defualt email until we have one made for the project
   type = string
-  #ADD DEFAULT EMAIL
+  #Waiting for ticket 14 to finish
 }
