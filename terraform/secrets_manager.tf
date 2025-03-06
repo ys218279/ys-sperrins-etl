@@ -5,23 +5,23 @@ resource "aws_secretsmanager_secret" "totesys_secret" {
 
 resource "aws_secretsmanager_secret_version" "totesys_secret_version" {
   secret_id     = aws_secretsmanager_secret.totesys_secret.id
-  secret_string = jsonencode({ username = var.A_TOTESYS_USERNAME 
-  password = var.B_TOTESYS_PASSWORD 
-  host = var.C_TOTESYS_HOST 
-  database = var.D_TOTESYS_DATABASE 
-  port = var.I_DB_PORT })
+  secret_string = jsonencode({ username = var.a_totesys_username 
+  password = var.b_totesys_password 
+  host = var.c_totesys_host 
+  database = var.d_totesys_database 
+  port = var.i_db_port })
 }
 
 resource "aws_secretsmanager_secret" "Data_Warehouse_secret" {
-  name = var.DW_credentials_secret_name
+  name = var.dw_credentials_secret_name
   recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret_version" "finalDW_secret_version" {
   secret_id     = aws_secretsmanager_secret.Data_Warehouse_secret.id
-  secret_string = jsonencode({  username = var.E_FINALDW_USERNAME 
-                                password = var.F_FINALDW_PASSWORD 
-                                host = var.G_FINALDW_HOST 
-                                database = var.H_FINALDW_DATABASE 
-                                port = var.I_DB_PORT })
+  secret_string = jsonencode({  username = var.e_final_dw_username 
+                                password = var.f_final_dw_password 
+                                host = var.g_final_dw_host 
+                                database = var.h_final_dw_database 
+                                port = var.i_db_port })
 }

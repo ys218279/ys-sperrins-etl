@@ -64,14 +64,14 @@ variable "totesys_credentials_secret_name" {
   sensitive = true
 }
 
-variable "DW_credentials_secret_name" {
+variable "dw_credentials_secret_name" {
   description = "Name of secret containing final Data Warehouse db credentials"
   type = string
   default = "totesys_data_warehouse_olap"
   sensitive = true
 }
 
-variable "I_DB_PORT" {
+variable "i_db_port" {
   description = "Please enter your totesys DB port: "
   type = string
   default = 5432
@@ -83,48 +83,48 @@ the prefix letter to set the order of the interactive
 variables, interactive variables are called in alphabetical
 order */
 
-variable "A_TOTESYS_USERNAME" {
+variable "a_totesys_username" {
   description = "Please enter your totesys DB username: "
-  type = string
-  sensitive = true
+  type        = string
+  sensitive   = true
 }
 
-variable "B_TOTESYS_PASSWORD" {
+variable "b_totesys_password" {
   description = "Please enter your totesys DB password: "
-  type = string
-  sensitive = true
+  type        = string
+  sensitive   = true
 }
 
-variable "C_TOTESYS_HOST" {
+variable "c_totesys_host" {
   description = "Please enter your totesys DB host: "
-  type = string
-  sensitive = true
+  type        = string
+  sensitive   = true
 }
 
-variable "D_TOTESYS_DATABASE" {
-  description = "Please enter your totesys database name : "
-  type = string
+variable "d_totesys_database" {
+  description = "Please enter your totesys database name: "
+  type        = string
 }
 
-variable "E_FINALDW_USERNAME" {
+variable "e_final_dw_username" {
   description = "Please enter your totesys DB username: "
-  type = string
-  sensitive = true
+  type        = string
+  sensitive   = true
 }
 
-variable "F_FINALDW_PASSWORD" {
+variable "f_final_dw_password" {
   description = "Please enter your totesys DB password: "
-  type = string
-  sensitive = true
+  type        = string
+  sensitive   = true
 }
 
-variable "G_FINALDW_HOST" {
+variable "g_final_dw_host" {
   description = "Please enter your totesys DB host: "
-  type = string
-  sensitive = true
+  type        = string
+  sensitive   = true
 }
 
-variable "H_FINALDW_DATABASE" {
-  description = "Please enter your totesys database name : "
-  type = string
+variable "h_final_dw_database" {
+  description = "Please enter your totesys database name: "
+  type        = string
 }
