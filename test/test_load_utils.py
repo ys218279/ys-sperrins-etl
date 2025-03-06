@@ -7,6 +7,8 @@ from moto import mock_aws
 import pytest
 import pandas as pd
 from io import BytesIO
+from pandasql import sqldf
+
 
 def test_pd_read_s3_parquet():
     with mock_aws():
@@ -27,3 +29,12 @@ def test_pd_read_s3_parquet():
         s3_client.put_object(Bucket=bucket_name, Key='test_data_parquet', Body=body)
         res_df = pd_read_s3_parquet('test_data_parquet', bucket_name, s3_client)
         pd.testing.assert_frame_equal(res_df, df)
+
+def test_get_column_names():
+    pysqldf = lambda q: sqldf(q, globals())
+    data = {'currency_id':[1, 2], 'currency_code':[1, 2], "currency_name": [1, 2]}
+    df = pd.DataFrame(data)
+    # pysqldf("INSERT INTO df ('currency_id', 'currency_code', 'currency_name') VALUES (1,2,3);")
+    
+    res = pysqldf(query)
+    return res

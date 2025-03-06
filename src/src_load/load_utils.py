@@ -88,35 +88,36 @@ def close_dw_connection(conn):
     """close dw"""
     conn.close()
 
-def load_tables_to_dw(conn, df, table_name, fact_tables, dim_tables):
+def load_tables_to_dw(conn, df, table_name, fact_tables):
     # engine = create_engine('postgresql://username:password@localhost:5432/postgres')
-    engine = generate_conn_dw_engine()
-    if table_name in fact_tables:
-        df.to_sql(table_name, con=engine, if_exists='append',index=False)
-    elif table_name in dim_tables:
-        check_empty_table = conn.run(f'SELECT * FROM {identifier(table_name)};')
-        if not check_empty_table:
-            df.to_sql(table_name, con=engine, if_exists='append',index=False)
-        column_names = get_column_names(conn, table_name)
-        print('get the column names')
-        update_query = get_update_query(table_name, column_names)
-        rows = [row for row in df.itertuples(index=False, name=None)]
-        for row in rows:
-            conn.run(update_query, row)
+    column_names = get_column_names(conn, table_name)
+    check_empty_table = is_table_empty(conn, table_name)
+    on_conflict = not(table_name in fact_tables or check_empty_table)
+    update_query = get_insert_query(table_name, column_names, on_conflict=on_conflict)
+    for row in df.itertuples(index=False, name=None):
+        conn.run(update_query % row , table_name=table_name)
+
+def is_table_empty(conn, table_name: str) -> bool:
+    return conn.run(f'SELECT 1 FROM {identifier(table_name)} LIMIT 1;') == []
 
 
-def get_update_query(table_name, column_names):
+def get_insert_query(table_name: str, column_names: List[str], on_conflict: bool) -> str:
     conflict_column = column_names[0]  
     placeholders = ", ".join(["%s"] * len(column_names))
     columns = ", ".join(column_names)
     update_set = ", ".join([f"{col} = EXCLUDED.{col}" for col in column_names[1:]])
     query = f"""
-    INSERT INTO {identifier(table_name)} ({identifier(columns)})
-    VALUES ({identifier(placeholders)})
-    ON CONFLICT ({identifier(conflict_column)})
-    DO UPDATE SET {identifier(update_set)};
+    INSERT INTO {table_name} ({columns})
+    VALUES ({placeholders})"""
+    if not on_conflict:
+        return f"{query};"
+    return f"""{query}
+    ON CONFLICT ({conflict_column})
+    DO UPDATE SET {update_set};
     """
-    return query
+
+
+
 
 def get_column_names(conn, table_name: str) -> List[str]:
     query = f"""
@@ -125,7 +126,6 @@ def get_column_names(conn, table_name: str) -> List[str]:
         WHERE table_name = :table_name;
     """
     result = conn.run(query, table_name=table_name)
-    print(result)
     return [row[0] for row in result]
 
 def delete_all_from_dw():
@@ -135,22 +135,17 @@ def delete_all_from_dw():
         query = f"DELETE FROM {identifier(table)};"
         conn.run(query)
 
-if __name__ == "__main__":
-    conn = connect_to_dw()
-    fact_tables =  ['fact_sales_order']
-    dim_tables = ['dim_date', 'dim_staff', 'dim_counterparty', 'dim_location', 'dim_currency', 'dim_design']
-    # data = {'currency_id':[1, 2], 'currency_code':[1, 2], "currency_name": [1, 2]}
+# if __name__ == "__main__":
+#     conn = connect_to_dw()
+#     fact_tables =  ['fact_sales_order']
+#     # data = {'currency_id':[1, 2], 'currency_code':[1, 2], "currency_name": [1, 2]}
     # df = pd.DataFrame(data)
-    # print(df)
-    # engine = generate_conn_dw_engine()
-    # df.to_sql('dim_currency', con=engine, if_exists='append',index=False)
-    updated_data = {'currency_id':[1, 2], 'currency_code':[2, 5], "currency_name": [1, 5]}
-    df_updated = pd.DataFrame(updated_data)
-    print(df_updated)
-    load_tables_to_dw(conn, df_updated, "dim_currency", fact_tables, dim_tables)
-
-
-    # delete_all_from_dw()
+    # load_tables_to_dw(conn, df, 'dim_currency', fact_tables)
+#     updated_data = {'currency_id':[1, 2], 'currency_code':[2, 5], "currency_name": [1, 5]}
+#     df_updated = pd.DataFrame(updated_data)
+#     print(df_updated)
+#     load_tables_to_dw(conn, df_updated, "dim_currency", fact_tables)
+#     # delete_all_from_dw()
 
 
 
