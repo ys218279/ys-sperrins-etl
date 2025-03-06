@@ -404,9 +404,9 @@ data "aws_iam_policy_document" "trust_policy_event_bridge" {
     effect = "Allow"
 
     principals {
-      type        = "Service"
+      type = "Service"
       identifiers = ["states.amazonaws.com",
-                    "scheduler.amazonaws.com"]
+      "scheduler.amazonaws.com"]
     }
 
     actions = [
@@ -432,7 +432,7 @@ data "aws_iam_policy_document" "eventbridge_document_execution" {
 
 resource "aws_iam_policy" "eventbridge_policy_state_machine_execution" {
   name_prefix = "state-machine-execution-eventbridge-"
-  policy      = data.aws_iam_policy_document.eventbridge_document_execution.json 
+  policy      = data.aws_iam_policy_document.eventbridge_document_execution.json
 }
 
 

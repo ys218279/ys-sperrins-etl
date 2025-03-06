@@ -15,6 +15,7 @@ venv/
 **.tfstate*
 .pytest*
 .env
-terraform/.terraform**/** 
-**/*.tfvars*
+terraform/.terraform**/**
+packages/
+layer/python/
 
