@@ -42,19 +42,20 @@ jobs:
       - name: Terraform init 
         working-directory: terraform
         run: terraform init
+      - name: Setup Terraform variables
+        run: |
+          echo "TF_VAR_a_totesys_username=${{ secrets.TF_VAR_A_TOTESYS_USERNAME }}" >> $GITHUB_ENV
+          echo "TF_VAR_b_totesys_password=${{ secrets.TF_VAR_B_TOTESYS_PASSWORD }}" >> $GITHUB_ENV
+          echo "TF_VAR_c_totesys_host=${{ secrets.TF_VAR_C_TOTESYS_HOST }}" >> $GITHUB_ENV
+          echo "TF_VAR_d_totesys_database=${{ secrets.TF_VAR_D_TOTESYS_DATABASE }}" >> $GITHUB_ENV
+          echo "TF_VAR_e_totesys_username=${{ secrets.TF_VAR_E_TOTESYS_USERNAME }}" >> $GITHUB_ENV
+          echo "TF_VAR_f_totesys_password=${{ secrets.TF_VAR_F_TOTESYS_PASSWORD }}" >> $GITHUB_ENV
+          echo "TF_VAR_g_totesys_host=${{ secrets.TF_VAR_G_TOTESYS_HOST }}" >> $GITHUB_ENV
+          echo "TF_VAR_h_totesys_database=${{ secrets.TF_VAR_H_TOTESYS_DATABASE }}" >> $GITHUB_ENV
       # terraform plan
       - name: Terraform plan 
         working-directory: terraform
-        run: |
-          export TF_VAR_a_totesys_username=$TF_VAR_a_totesys_username
-          export TF_VAR_b_totesys_password=$TF_VAR_b_totesys_password
-          export TF_VAR_c_totesys_host=$TF_VAR_c_totesys_host
-          export TF_VAR_d_totesys_database=$TF_VAR_d_totesys_database
-          export TF_VAR_e_totesys_username=$TF_VAR_e_totesys_username
-          export TF_VAR_f_totesys_password=$TF_VAR_f_totesys_password
-          export TF_VAR_g_totesys_host=$TF_VAR_g_totesys_host
-          export TF_VAR_h_totesys_database=$TF_VAR_h_totesys_database
-          terraform plan 
+        run: terraform plan 
       # terraform fmt
       - name: Terraform format
         working-directory: terraform
@@ -62,13 +63,4 @@ jobs:
       # terraform apply and grab secrets
       - name: Terraform apply
         working-directory: terraform 
-        run: |
-          export TF_VAR_a_totesys_username=$TF_VAR_a_totesys_username
-          export TF_VAR_b_totesys_password=$TF_VAR_b_totesys_password
-          export TF_VAR_c_totesys_host=$TF_VAR_c_totesys_host
-          export TF_VAR_d_totesys_database=$TF_VAR_d_totesys_database
-          export TF_VAR_e_totesys_username=$TF_VAR_e_totesys_username
-          export TF_VAR_f_totesys_password=$TF_VAR_f_totesys_password
-          export TF_VAR_g_totesys_host=$TF_VAR_g_totesys_host
-          export TF_VAR_h_totesys_database=$TF_VAR_h_totesys_database 
-          terraform apply -auto-approve
+        run: terraform apply -auto-approve
