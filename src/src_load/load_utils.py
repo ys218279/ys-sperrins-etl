@@ -98,6 +98,7 @@ def load_tables_to_dw(conn, df, table_name, fact_tables, dim_tables):
         if not check_empty_table:
             df.to_sql(table_name, con=engine, if_exists='append',index=False)
         column_names = get_column_names(conn, table_name)
+        print('get the column names')
         update_query = get_update_query(table_name, column_names)
         rows = [row for row in df.itertuples(index=False, name=None)]
         for row in rows:
@@ -113,7 +114,7 @@ def get_update_query(table_name, column_names):
     INSERT INTO {identifier(table_name)} ({identifier(columns)})
     VALUES ({identifier(placeholders)})
     ON CONFLICT ({identifier(conflict_column)})
-    DO UPDATE SET {identifier(update_set)}
+    DO UPDATE SET {identifier(update_set)};
     """
     return query
 
@@ -121,9 +122,10 @@ def get_column_names(conn, table_name: str) -> List[str]:
     query = f"""
         SELECT column_name 
         FROM information_schema.columns 
-        WHERE table_name = :table
+        WHERE table_name = :table_name;
     """
-    result = conn.run(query, table=table_name)
+    result = conn.run(query, table_name=table_name)
+    print(result)
     return [row[0] for row in result]
 
 def delete_all_from_dw():
@@ -133,11 +135,21 @@ def delete_all_from_dw():
         query = f"DELETE FROM {identifier(table)};"
         conn.run(query)
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
+    conn = connect_to_dw()
+    fact_tables =  ['fact_sales_order']
+    dim_tables = ['dim_date', 'dim_staff', 'dim_counterparty', 'dim_location', 'dim_currency', 'dim_design']
     # data = {'currency_id':[1, 2], 'currency_code':[1, 2], "currency_name": [1, 2]}
     # df = pd.DataFrame(data)
+    # print(df)
     # engine = generate_conn_dw_engine()
     # df.to_sql('dim_currency', con=engine, if_exists='append',index=False)
+    updated_data = {'currency_id':[1, 2], 'currency_code':[2, 5], "currency_name": [1, 5]}
+    df_updated = pd.DataFrame(updated_data)
+    print(df_updated)
+    load_tables_to_dw(conn, df_updated, "dim_currency", fact_tables, dim_tables)
+
+
     # delete_all_from_dw()
 
 
