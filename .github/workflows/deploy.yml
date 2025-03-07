@@ -45,6 +45,7 @@ jobs:
       # setup terraform variables
       - name: Setup Terraform variables
         run: |
+          echo "TF_VAR_email_address=${{ secrets.EMAIL_SUBSCRIBED_TO_SNS }}" >> $GITHUB_ENV
           echo "TF_VAR_a_totesys_username=${{ secrets.A_TOTESYS_USERNAME }}" >> $GITHUB_ENV
           echo "TF_VAR_b_totesys_password=${{ secrets.B_TOTESYS_PASSWORD }}" >> $GITHUB_ENV
           echo "TF_VAR_c_totesys_host=${{ secrets.C_TOTESYS_HOST }}" >> $GITHUB_ENV

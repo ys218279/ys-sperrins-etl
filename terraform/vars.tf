@@ -56,7 +56,17 @@ variable "processed_bucket_prefix" {
   default     = "processed-zone"
 
 }
+variable "lambda_failure_topic_name" {
+  description = "Value of the Name tag for the lambda_failure_topic_name"
+  type        = string
+  default = "team_sperrins_topic"
+  
+}
 
+variable "email_address" {
+  description = "value of email used to subscribe to sns"
+  type = string
+}
 variable "totesys_credentials_secret_name" {
   description = "Name of secret containing totesys db credentials"
   type = string
