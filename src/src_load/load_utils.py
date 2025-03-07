@@ -189,12 +189,12 @@ if __name__ == "__main__":
     fact_tables =  ['fact_sales_order']
     # data = {'currency_id':[1, 2], 'currency_code':["/dsa1@", "dsa/2"], "currency_name": [1, 2]}
     # df = pd.DataFrame(data).set_index('currency_id')
-    df = pd.read_parquet("/Users/jchjiangcheng/Northcoders/project/team-09-sperrins/src/src_load/143430.parquet")
-    print(df.columns)
-    res = get_column_names(conn, 'fact_sales_order')
-    on_conflict = False
-    column_names = res[1:] if not on_conflict else res
-    print(column_names)
+    # df = pd.read_parquet("/Users/jchjiangcheng/Northcoders/project/team-09-sperrins/src/src_load/143430.parquet")
+    # print(df.columns)
+    # res = get_column_names(conn, 'fact_sales_order')
+    # on_conflict = False
+    # column_names = res[1:] if not on_conflict else res
+    # print(column_names)
     # load_tables_to_dw(conn, df, 'fact_sales_order', fact_tables)
     # # updated_data = {'currency_id':[1, 2], 'currency_code':[2, 5], "currency_name": [1, 5]}
     # # df_updated = pd.DataFrame(updated_data).set_index('currency_id')
@@ -202,5 +202,5 @@ if __name__ == "__main__":
     # # load_tables_to_dw(conn, df_updated, "dim_currency", fact_tables)
     
     # print(df.head(10))
-    # delete_all_from_dw()
+    delete_all_from_dw()
    
