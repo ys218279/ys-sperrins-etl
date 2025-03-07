@@ -104,7 +104,7 @@ def create_dim_date_table(start='2019/01/01', end='2030/12/31'):
     df_date["year"] = df_date.Date.dt.year
     df_date["month"] = df_date.Date.dt.month
     df_date["day"] = df_date.Date.dt.day
-    df_date["day_of_week"] = df_date.Date.dt.dayofweek 
+    df_date["day_of_week"] = df_date.Date.dt.dayofweek + 1
     df_date["day_name"] = df_date.Date.dt.day_name()
     df_date["month_name"] = df_date.Date.dt.month_name()
     df_date["quarter"] = df_date.Date.dt.quarter
