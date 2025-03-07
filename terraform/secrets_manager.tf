@@ -6,10 +6,13 @@ resource "aws_secretsmanager_secret" "totesys_secret" {
 resource "aws_secretsmanager_secret_version" "totesys_secret_version" {
   secret_id     = aws_secretsmanager_secret.totesys_secret.id
   secret_string = jsonencode({ username = var.a_totesys_username 
-  password = var.b_totesys_password 
-  host = var.c_totesys_host 
-  database = var.d_totesys_database 
-  port = var.i_db_port })
+                                password = var.b_totesys_password 
+                                host = var.c_totesys_host 
+                                database = var.d_totesys_database 
+                                port = var.i_db_port })
+  lifecycle {
+    ignore_changes = [secret_string]
+  }
 }
 
 resource "aws_secretsmanager_secret" "Data_Warehouse_secret" {
@@ -24,4 +27,7 @@ resource "aws_secretsmanager_secret_version" "finalDW_secret_version" {
                                 host = var.g_final_dw_host 
                                 database = var.h_final_dw_database 
                                 port = var.i_db_port })
+  lifecycle {
+    ignore_changes = [secret_string]
+  }
 }
