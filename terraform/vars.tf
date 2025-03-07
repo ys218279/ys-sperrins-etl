@@ -68,8 +68,7 @@ variable "lambda_failure_topic_name" {
 variable "email_address" {
   description = "value of email used to subscribe to sns"
   type = string
-  #Waiting for ticket 14 to finish
-
+}
 variable "totesys_credentials_secret_name" {
   description = "Name of secret containing totesys db credentials"
   type = string
