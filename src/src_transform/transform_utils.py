@@ -43,8 +43,9 @@ def get_s3_object(client, bucket, key):
         s3_obj_dict = json.loads(s3_obj_bytes.decode('utf-8'))
         return s3_obj_dict
     except ClientError as e:
-        logger.error("Unable to get object from Ingestion Bucket, %s",  str(e))
-        print('Client Error as: ', e)
+        logger.critical("Unable to get object from Ingestion Bucket, %s",  str(e))
+        print('Client Error as: %s', str(e))
+
 def convert_s3_obj_to_df(s3_obj_dict):
     """Converts s3 object contents to panda dataframe
     
@@ -60,11 +61,13 @@ def convert_s3_obj_to_df(s3_obj_dict):
         df = pd.DataFrame(data,columns=columns)
         return df
     except KeyError as e:
-        logger.error("Key Error, %s",  str(e))
+        logger.error("Key Error when converting s3 object to panda data frame, %s",  str(e))
         print('Key Error as: ', e)
     except TypeError as e:
-        logger.error("Type Error , %s",  str(e))    
-        print('Type Error: ', e)
+        logger.error("Type Error when converting s3 object to panda data frame, %s",  str(e))    
+        print('Type Error: %s', str(e))
+    except Exception as e:
+        logger.critical("Error when converting s3 object to panda data frame, %s",  str(e))
 
 def convert_df_to_s3_obj(client, df, bucket, key):
     """Converts panda dataframe to s3 parquet object
@@ -82,8 +85,10 @@ def convert_df_to_s3_obj(client, df, bucket, key):
         body = output_buffer.getvalue()
         client.put_object(Bucket=bucket, Key=key, Body=body)
     except ClientError as e:
-        logger.error("S3 Client Error , %s",  str(e))
-        print('Client Error as: ', e)
+        logger.error("S3 Client Error when converting panda dataframe to s3 object, %s",  str(e))
+        print('Client Error as: %s', str(e))
+    except Exception as e:
+        logger.critical("Error when converting panda data frame to s3 object, %s",  str(e))
 
 
 
