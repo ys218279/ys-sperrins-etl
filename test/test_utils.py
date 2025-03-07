@@ -4,11 +4,15 @@ from src.src_ingestion.utils import (
     upload_to_s3,
     fetch_latest_update_time_from_s3,
     fetch_latest_update_time_from_db,
-    entry,
     retrieval,
     connect_to_db,
     close_db_connection
 )
+
+from src.src_load.utils import (
+    load_retrieval
+)
+
 import boto3
 import unittest
 from unittest.mock import patch, Mock
@@ -32,7 +36,6 @@ def input_args():
     yield "database"
     yield "port"
 
-
 def input_args_2():
     yield "bidenj"
     yield "Pa55word"
@@ -41,7 +44,31 @@ def input_args_2():
     yield "port"
     # yield "abc"
     
-
+def entry(client,secret_identifier = "de_2024_12_02"):
+    """Use to create the initial TEST secret"""
+    if "SecretsManager" in str(type(client)):
+        get_username = "test"
+        get_password = "test"
+        get_host = "test"
+        get_database = "test"
+        get_port = "test"
+        secret_value = {
+            "username": get_username,
+            "password": get_password,
+            "host": get_host,
+            "database": get_database,
+            "port": get_port,
+        }
+        secret_string = json.dumps(secret_value)
+        try:
+            client.create_secret(Name=secret_identifier, SecretString=secret_string)
+            print("Secret saved.")
+        except client.exceptions.ResourceExistsException as e:
+            print("Secret already exists!")
+        except Exception as err:
+            print({"ERROR": err, "message": "Fail to connect to aws secret manager!"})
+    else:
+        print("invalid client type used for secret manager! plz contact developer!")
 
 
 class TestEntry:
@@ -104,11 +131,11 @@ class TestRetrieval:
                 res = retrieval(client)
                 mock_input.input_args = ["de_2024_12_02"]
                 assert res == {
-                    "username": "bidenj",
-                    "password": "Pa55word",
-                    "host": "host",
-                    "database": "database",
-                    "port": "port",
+                    "username": "test",
+                    "password": "test",
+                    "host": "test",
+                    "database": "test",
+                    "port": "test",
                 }
 
     @patch("builtins.input")
@@ -123,33 +150,6 @@ class TestRetrieval:
                     in result
                 )
 
-
-def entry(client,secret_identifier = "de_2024_12_02"):
-    """will only be used once to create the initial TEST secret"""
-    if "SecretsManager" in str(type(client)):
-        # secret_identifier = "de_2024_12_02"
-        get_username = "test"
-        get_password = "test"
-        get_host = "test"
-        get_database = "test"
-        get_port = "test"
-        secret_value = {
-            "username": get_username,
-            "password": get_password,
-            "host": get_host,
-            "database": get_database,
-            "port": get_port,
-        }
-        secret_string = json.dumps(secret_value)
-        try:
-            client.create_secret(Name=secret_identifier, SecretString=secret_string)
-            print("Secret saved.")
-        except client.exceptions.ResourceExistsException as e:
-            print("Secret already exists!")
-        except Exception as err:
-            print({"ERROR": err, "message": "Fail to connect to aws secret manager!"})
-    else:
-        print("invalid client type used for secret manager! plz contact developer!")
 
 class TestLoadLambdaRetrieval:
     @patch("builtins.input", side_effect=input_args())
@@ -204,8 +204,7 @@ class TestLoadLambdaRetrieval:
                 assert "There has been a critical error when attempting to retrieve secret for totesys DB credentials" in caplog.text
 
 
-class TestConnectToDB:
-    
+class TestConnectToDB:  
     @patch("builtins.input", side_effect=input_args_2())
     def test_connect_to_db_DatabaseError(self, mock_input, caplog):
         with mock_aws():
