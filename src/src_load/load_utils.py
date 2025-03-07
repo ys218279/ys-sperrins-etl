@@ -89,21 +89,15 @@ def close_dw_connection(conn):
     conn.close()
 
 def load_tables_to_dw(conn, df, table_name, fact_tables):
-    # engine = create_engine('postgresql://username:password@localhost:5432/postgres')
     column_names = get_column_names(conn, table_name)
-    check_empty_table = is_table_empty(conn, table_name)
-    on_conflict = not(table_name in fact_tables or check_empty_table)
+    on_conflict = table_name not in fact_tables
     update_query = get_insert_query(table_name, column_names, on_conflict=on_conflict)
-    for row in df.itertuples(index=False, name=None):
-        conn.run(update_query % row , table_name=table_name)
-
-def is_table_empty(conn, table_name: str) -> bool:
-    return conn.run(f'SELECT 1 FROM {identifier(table_name)} LIMIT 1;') == []
-
+    for row in df.reset_index().to_dict(orient="records"):
+        conn.run(update_query, **row, table_name=table_name)
 
 def get_insert_query(table_name: str, column_names: List[str], on_conflict: bool) -> str:
     conflict_column = column_names[0]  
-    placeholders = ", ".join(["%s"] * len(column_names))
+    placeholders = ", ".join([f":{column_name}" for column_name in column_names])
     columns = ", ".join(column_names)
     update_set = ", ".join([f"{col} = EXCLUDED.{col}" for col in column_names[1:]])
     query = f"""
@@ -117,8 +111,6 @@ def get_insert_query(table_name: str, column_names: List[str], on_conflict: bool
     """
 
 
-
-
 def get_column_names(conn, table_name: str) -> List[str]:
     query = f"""
         SELECT column_name 
@@ -128,6 +120,7 @@ def get_column_names(conn, table_name: str) -> List[str]:
     result = conn.run(query, table_name=table_name)
     return [row[0] for row in result]
 
+
 def delete_all_from_dw():
     conn = connect_to_dw()
     tables = ['dim_date', 'dim_staff', 'dim_counterparty', 'dim_location', 'dim_currency', 'dim_design', 'fact_sales_order']
@@ -135,17 +128,14 @@ def delete_all_from_dw():
         query = f"DELETE FROM {identifier(table)};"
         conn.run(query)
 
-# if __name__ == "__main__":
-#     conn = connect_to_dw()
-#     fact_tables =  ['fact_sales_order']
-#     # data = {'currency_id':[1, 2], 'currency_code':[1, 2], "currency_name": [1, 2]}
-    # df = pd.DataFrame(data)
-    # load_tables_to_dw(conn, df, 'dim_currency', fact_tables)
-#     updated_data = {'currency_id':[1, 2], 'currency_code':[2, 5], "currency_name": [1, 5]}
-#     df_updated = pd.DataFrame(updated_data)
-#     print(df_updated)
-#     load_tables_to_dw(conn, df_updated, "dim_currency", fact_tables)
-#     # delete_all_from_dw()
-
-
-
+if __name__ == "__main__":
+    conn = connect_to_dw()
+    fact_tables =  ['fact_sales_order']
+    data = {'currency_id':[1, 2], 'currency_code':["/dsa1@", "dsa/2"], "currency_name": [1, 2]}
+    df = pd.DataFrame(data).set_index('currency_id')
+    load_tables_to_dw(conn, df, 'dim_currency', fact_tables)
+    updated_data = {'currency_id':[1, 2], 'currency_code':[2, 5], "currency_name": [1, 5]}
+    df_updated = pd.DataFrame(updated_data).set_index('currency_id')
+    print(df_updated)
+    load_tables_to_dw(conn, df_updated, "dim_currency", fact_tables)
+    delete_all_from_dw()
