@@ -38,6 +38,10 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }} 
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      # terraform init
+      - name: Terraform init 
+        working-directory: terraform
+        run: terraform init
       # setup terraform variables
       - name: Setup Terraform variables
         run: |
@@ -53,10 +57,6 @@ jobs:
       - name: Terraform destroy
         working-directory: terraform
         run: terraform destroy
-      # terraform init
-      - name: Terraform init 
-        working-directory: terraform
-        run: terraform init
       # terraform plan
       - name: Terraform plan 
         working-directory: terraform
