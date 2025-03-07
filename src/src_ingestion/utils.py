@@ -11,6 +11,7 @@ sys.path.append("src/src_ingestion")
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+
 def entry(client):
     """This function has been depricated"""
     if "SecretsManager" in str(type(client)):
