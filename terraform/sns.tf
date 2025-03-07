@@ -1,6 +1,6 @@
 # Create an SNS topic
 resource "aws_sns_topic" "team_sperrins_topic" {
-  name = var.lambda_ingestion_topic_name 
+  name = var.lambda_failure_topic_name 
 }
 
 

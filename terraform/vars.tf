@@ -57,8 +57,8 @@ variable "processed_bucket_prefix" {
 
 }
 
-variable "lambda_ingestion_topic_name" {
-  description = "Value of the Name tag for the lambda_Ingestion_topic_name"
+variable "lambda_failure_topic_name" {
+  description = "Value of the Name tag for the lambda_failure_topic_name"
   type        = string
   default = "team_sperrins_topic"
   
