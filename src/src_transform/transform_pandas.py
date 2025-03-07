@@ -12,7 +12,7 @@ def create_dim_design_table(df_des):
     Returns:
     - df_dim_design (panda df obj): The table in dataframe format - target
     """
-    df_design = df_des.copy().set_index('design_id')
+    df_design = df_des.copy()
     df_dim_design = df_design.drop(columns=['created_at','last_updated'])
     return df_dim_design
 
@@ -25,7 +25,7 @@ def create_dim_currency_table(df_cur):
     Returns:
     - df_dim_currency (panda df obj): The table in dataframe format - target
     """
-    df_currency = df_cur.copy().set_index('currency_id')
+    df_currency = df_cur.copy()
     df_dim_currency = df_currency.drop(columns=['created_at','last_updated'])
     currency_dictionary = {'GBP': 'Pound sterling', 'EUR': 'Euro', 'USD': 'United States dollar'}
     df_dim_currency['currency_name'] = df_dim_currency['currency_code'].map(currency_dictionary)
@@ -46,7 +46,7 @@ def create_dim_staff_table(df_sta, df_dep):
     df_staff_mod = df_staff.drop(columns=['created_at','last_updated'])
     df_department_mod = df_department.drop(columns=['created_at','last_updated', 'manager'])
     df_dim_staff = pd.merge(df_staff_mod, df_department_mod, left_on='department_id', right_on='department_id', how='left').drop(columns=['department_id'])
-    df_dim_staff = df_dim_staff.set_index('staff_id')
+    df_dim_staff = df_dim_staff
     return df_dim_staff
 
 def create_dim_location_table(df_addr):
@@ -61,7 +61,7 @@ def create_dim_location_table(df_addr):
     df_address = df_addr.copy()
     df_dim_location = df_address.drop(columns=['created_at','last_updated'])
     df_dim_location_mod = df_dim_location.rename(columns={'address_id':'location_id'})
-    df_dim_location_mod_2 = df_dim_location_mod.set_index('location_id')
+    df_dim_location_mod_2 = df_dim_location_mod
     return df_dim_location_mod_2
 
 def create_dim_counterparty_table(df_addr, df_cp):
@@ -85,9 +85,8 @@ def create_dim_counterparty_table(df_addr, df_cp):
                                                       'city': 'counterparty_legal_city',
                                                       'postal_code': 'counterparty_legal_postal_code',
                                                       'country' : 'counterparty_legal_country',
-                                                      'phone': 'counterparty_legal_phone'})
-    df_dim_counterparty_mod_2 = df_dim_counterparty_mod.set_index('counterparty_id')
-    return df_dim_counterparty_mod_2
+                                                      'phone': 'counterparty_legal_phone_number'})
+    return df_dim_counterparty_mod
 
 def create_dim_date_table(start='2019/01/01', end='2030/12/31'):
     '''
@@ -111,8 +110,7 @@ def create_dim_date_table(start='2019/01/01', end='2030/12/31'):
     df_date["quarter"] = df_date.Date.dt.quarter
     df_date_mod = df_date.rename(columns={'Date':'date_id'})
     df_date_mod["date_id"] = pd.to_datetime(df_date_mod["date_id"]).dt.strftime('%Y-%m-%d')
-    df_date_mod_2 = df_date_mod.set_index('date_id')
-    return df_date_mod_2
+    return df_date_mod
 
 def create_fact_sales_order_table(df_sales):
     """Converts source df table to target df table schema
@@ -128,7 +126,7 @@ def create_fact_sales_order_table(df_sales):
     df_sales_order["created_time"] = pd.to_datetime(df_sales_order["created_at"], format='ISO8601').dt.strftime('%H:%M:%S.%f')
     df_sales_order["last_updated_date"] = pd.to_datetime(df_sales_order["last_updated"], format='ISO8601').dt.strftime('%Y-%m-%d')
     df_sales_order["last_updated_time"] = pd.to_datetime(df_sales_order["last_updated"], format='ISO8601').dt.strftime('%H:%M:%S.%f')
-    df_fact_sales_order = df_sales_order.drop(columns=['created_at','last_updated']).set_index('sales_order_id')
+    df_fact_sales_order = df_sales_order.drop(columns=['created_at','last_updated'])
     return df_fact_sales_order
 
 

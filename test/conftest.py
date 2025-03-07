@@ -162,7 +162,7 @@ def output_data_design():
         "file_location": ["folder/next", "folder2/next2", "folder3/next3"],
         "file_name": ["image.png", "image2.png", "image2.png"],
     }
-    return pd.DataFrame(data=data).set_index('design_id')
+    return pd.DataFrame(data=data)
 
 
 @pytest.fixture(scope="module")
@@ -191,7 +191,7 @@ def output_data_currency():
         "currency_code": ["GBP", "EUR", "USD"],
         "currency_name": ["Pound sterling", "Euro", "United States dollar"],
     }
-    return pd.DataFrame(data=data).set_index('currency_id')
+    return pd.DataFrame(data=data)
 
 
 @pytest.fixture(scope="module")
@@ -247,7 +247,7 @@ def output_data_staff():
         "department_name": ["Sales", "Tech", "Marketing"],
         "location": ["Manchester", "London", "Leeds"],
     }
-    return pd.DataFrame(data=data).set_index('staff_id')
+    return pd.DataFrame(data=data)
 
 
 @pytest.fixture(scope="module")
@@ -285,7 +285,7 @@ def output_data_location():
         "postal_code": ["GU1 342", "TW3 827", "YE4 978"],
         "phone": ["078853686554", "07576455456", "07846556544"],
     }
-    return pd.DataFrame(data=data).set_index('location_id')
+    return pd.DataFrame(data=data)
 
 
 @pytest.fixture(scope="module")
@@ -324,9 +324,9 @@ def output_data_counterparty():
         "counterparty_legal_district": ["Lambeth", "Merton", "Richmond"],
         "counterparty_legal_city": ["Manchester", "London", "Leeds"],
         "counterparty_legal_postal_code": ["GU1 342", "TW3 827", "YE4 978"],
-        "counterparty_legal_phone": ["078853686554", "07576455456", "07846556544"],
+        "counterparty_legal_phone_number": ["078853686554", "07576455456", "07846556544"],
     }
-    return pd.DataFrame(data=data).set_index('counterparty_id')
+    return pd.DataFrame(data=data)
 
 
 @pytest.fixture(scope="module")
@@ -341,7 +341,7 @@ def output_data_date():
         "month_name": ["March", "March", "March"],
         "quarter": [1, 1, 1],
     }
-    df_date = pd.DataFrame(data=data).set_index('date_id')
+    df_date = pd.DataFrame(data=data)
 
     return df_date
 
@@ -396,5 +396,5 @@ def output_data_sales_order():
         "last_updated_date": ["2022-11-03", "2022-11-03", "2022-11-03"],
         "last_updated_time": ["14:20:49.962000", "14:20:49.962000", "14:20:49.962000"],
     }
-    output_df_sales_order = pd.DataFrame(data=data).set_index('sales_order_id')
+    output_df_sales_order = pd.DataFrame(data=data)
     return output_df_sales_order
