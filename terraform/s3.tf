@@ -4,7 +4,7 @@ resource "aws_s3_bucket" "ingestion_bucket" {
   tags = {
     bucket_type = "ingestion"
     Service     = "s3"
-    Environment = var.Environment
+    Environment = var.environment
   }
 }
 
@@ -14,7 +14,7 @@ resource "aws_s3_bucket" "processed_bucket" {
   tags = {
     bucket_type = "processed"
     Service     = "s3"
-    Environment = var.Environment
+    Environment = var.environment
   }
 }
 #======================================================================
