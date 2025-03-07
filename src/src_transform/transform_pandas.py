@@ -105,7 +105,7 @@ def create_dim_date_table(start='2019/01/01', end='2030/12/31'):
     df_date["year"] = df_date.Date.dt.year
     df_date["month"] = df_date.Date.dt.month
     df_date["day"] = df_date.Date.dt.day
-    df_date["day_of_week"] = df_date.Date.dt.dayofweek 
+    df_date["day_of_week"] = df_date.Date.dt.dayofweek + 1
     df_date["day_name"] = df_date.Date.dt.day_name()
     df_date["month_name"] = df_date.Date.dt.month_name()
     df_date["quarter"] = df_date.Date.dt.quarter
@@ -128,7 +128,8 @@ def create_fact_sales_order_table(df_sales):
     df_sales_order["created_time"] = pd.to_datetime(df_sales_order["created_at"], format='ISO8601').dt.strftime('%H:%M:%S.%f')
     df_sales_order["last_updated_date"] = pd.to_datetime(df_sales_order["last_updated"], format='ISO8601').dt.strftime('%Y-%m-%d')
     df_sales_order["last_updated_time"] = pd.to_datetime(df_sales_order["last_updated"], format='ISO8601').dt.strftime('%H:%M:%S.%f')
-    df_fact_sales_order = df_sales_order.drop(columns=['created_at','last_updated']).set_index('sales_order_id')
-    return df_fact_sales_order
+    df_fact_sales_order = df_sales_order.rename(columns={'staff_id': 'sales_staff_id'})
+    df_fact_sales_order_mod = df_fact_sales_order.drop(columns=['created_at','last_updated']).set_index('sales_order_id')
+    return df_fact_sales_order_mod
 
 
