@@ -79,13 +79,13 @@ def create_dim_counterparty_table(df_addr, df_cp):
     df_address_mod = df_address.drop(columns=['created_at','last_updated'])
     df_counterparty_mod = df_counterparty.drop(columns=['created_at','last_updated', 'commercial_contact', 'delivery_contact'])
     df_dim_counterparty = pd.merge(df_counterparty_mod, df_address_mod, left_on='legal_address_id', right_on='address_id', how='inner').drop(columns=['address_id', 'legal_address_id'])
-    df_dim_counterparty_mod = df_dim_counterparty.rename(columns={'address_line_1': 'counterparty_address_line_1', 
-                                                      'address_line_2': 'counterparty_address_line_2',
-                                                      'district': 'counterparty_district',
-                                                      'city': 'counterparty_city',
-                                                      'postal_code': 'counterparty_postal_code',
-                                                      'country' : 'counterparty_country',
-                                                      'phone': 'counterparty_phone'})
+    df_dim_counterparty_mod = df_dim_counterparty.rename(columns={'address_line_1': 'counterparty_legal_address_line_1', 
+                                                      'address_line_2': 'counterparty_legal_address_line_2',
+                                                      'district': 'counterparty_legal_district',
+                                                      'city': 'counterparty_legal_city',
+                                                      'postal_code': 'counterparty_legal_postal_code',
+                                                      'country' : 'counterparty_legal_country',
+                                                      'phone': 'counterparty_legal_phone'})
     df_dim_counterparty_mod_2 = df_dim_counterparty_mod.set_index('counterparty_id')
     return df_dim_counterparty_mod_2
 
