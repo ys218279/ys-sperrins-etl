@@ -85,7 +85,7 @@ def create_dim_counterparty_table(df_addr, df_cp):
                                                       'city': 'counterparty_legal_city',
                                                       'postal_code': 'counterparty_legal_postal_code',
                                                       'country' : 'counterparty_legal_country',
-                                                      'phone': 'counterparty_legal_phone'})
+                                                      'phone': 'counterparty_legal_phone_number'})
     df_dim_counterparty_mod_2 = df_dim_counterparty_mod.set_index('counterparty_id')
     return df_dim_counterparty_mod_2
 

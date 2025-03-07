@@ -324,7 +324,7 @@ def output_data_counterparty():
         "counterparty_legal_district": ["Lambeth", "Merton", "Richmond"],
         "counterparty_legal_city": ["Manchester", "London", "Leeds"],
         "counterparty_legal_postal_code": ["GU1 342", "TW3 827", "YE4 978"],
-        "counterparty_legal_phone": ["078853686554", "07576455456", "07846556544"],
+        "counterparty_legal_phone_number": ["078853686554", "07576455456", "07846556544"],
     }
     return pd.DataFrame(data=data).set_index('counterparty_id')
 

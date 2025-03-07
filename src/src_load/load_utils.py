@@ -106,11 +106,34 @@ def load_tables_to_dw(conn, df, table_name, fact_tables):
     """
     column_names = get_column_names(conn, table_name)
     on_conflict = table_name not in fact_tables
-    update_query = get_insert_query(table_name, column_names, on_conflict=on_conflict)
+    update_query = get_insert_query(table_name, column_names, df.index.name, on_conflict=on_conflict)
     for row in df.reset_index().to_dict(orient="records"):
         conn.run(update_query, **row, table_name=table_name)
 
-def get_insert_query(table_name, column_names, on_conflict):
+# def get_insert_query(table_name, column_names, conflict_column, on_conflict):
+#     """Given table name and column names of the table return the conditional query
+    
+#     Keyword arguments:
+#     - table_name (str): name of the table
+#     - column_names (list): column names of the table
+#     - on_conflict (bool): fact table or not
+    
+#     Returns:
+#     - query (string)
+#     """
+#     placeholders = ", ".join([f":{column_name}" for column_name in column_names])
+#     columns = ", ".join(column_names)
+#     update_set = ", ".join([f"{col} = EXCLUDED.{col}" for col in column_names[1:]])
+#     query = f"""INSERT INTO {table_name} ({columns})
+#     VALUES ({placeholders})"""
+#     if not on_conflict:
+#         return f"{query};"
+#     return f"""{query}
+#     ON CONFLICT ({conflict_column})
+#     DO UPDATE SET {update_set};
+#     """
+
+def get_insert_query(table_name, column_names, conflict_column, on_conflict):
     """Given table name and column names of the table return the conditional query
     
     Keyword arguments:
@@ -121,7 +144,7 @@ def get_insert_query(table_name, column_names, on_conflict):
     Returns:
     - query (string)
     """
-    conflict_column = column_names[0]  
+    column_names = column_names[1:] if not on_conflict else column_names
     placeholders = ", ".join([f":{column_name}" for column_name in column_names])
     columns = ", ".join(column_names)
     update_set = ", ".join([f"{col} = EXCLUDED.{col}" for col in column_names[1:]])
@@ -163,12 +186,21 @@ def delete_all_from_dw():
 
 if __name__ == "__main__":
     conn = connect_to_dw()
-    # fact_tables =  ['fact_sales_order']
+    fact_tables =  ['fact_sales_order']
     # data = {'currency_id':[1, 2], 'currency_code':["/dsa1@", "dsa/2"], "currency_name": [1, 2]}
     # df = pd.DataFrame(data).set_index('currency_id')
-    # load_tables_to_dw(conn, df, 'dim_currency', fact_tables)
-    # updated_data = {'currency_id':[1, 2], 'currency_code':[2, 5], "currency_name": [1, 5]}
-    # df_updated = pd.DataFrame(updated_data).set_index('currency_id')
-    # print(df_updated)
-    # load_tables_to_dw(conn, df_updated, "dim_currency", fact_tables)
+    df = pd.read_parquet("/Users/jchjiangcheng/Northcoders/project/team-09-sperrins/src/src_load/143430.parquet")
+    print(df.columns)
+    res = get_column_names(conn, 'fact_sales_order')
+    on_conflict = False
+    column_names = res[1:] if not on_conflict else res
+    print(column_names)
+    # load_tables_to_dw(conn, df, 'fact_sales_order', fact_tables)
+    # # updated_data = {'currency_id':[1, 2], 'currency_code':[2, 5], "currency_name": [1, 5]}
+    # # df_updated = pd.DataFrame(updated_data).set_index('currency_id')
+    # # print(df_updated)
+    # # load_tables_to_dw(conn, df_updated, "dim_currency", fact_tables)
+    
+    # print(df.head(10))
     # delete_all_from_dw()
+   

@@ -54,7 +54,7 @@ class TestGetInsertQuery:
         on_conflict = False
         res = get_insert_query(table_name, column_names, on_conflict)
         expected = (
-            "INSERT INTO fact_sales (sales_record_id, sales_order_id, created_date, created_time, last_updated_date, last_updated_time, sales_staff_id, counterparty_id, units_sold, unit_price, currency_id, design_id, agreed_payment_date, agreed_delivery_date, agreed_delivery_location_id)\n"
+            "INSERT INTO fact_sales (sales_order_id, created_date, created_time, last_updated_date, last_updated_time, sales_staff_id, counterparty_id, units_sold, unit_price, currency_id, design_id, agreed_payment_date, agreed_delivery_date, agreed_delivery_location_id)\n"
             "    VALUES (:sales_record_id, :sales_order_id, :created_date, :created_time, :last_updated_date, :last_updated_time, :sales_staff_id, :counterparty_id, :units_sold, :unit_price, :currency_id, :design_id, :agreed_payment_date, :agreed_delivery_date, :agreed_delivery_location_id);"
         )
         assert res.strip() == expected.strip()
