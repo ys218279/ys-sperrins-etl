@@ -12,7 +12,6 @@ with patch.dict(os.environ, {"S3_BUCKET_NAME_INGESTION": "test_bucket_ingestion"
 class DummyContext:
     pass
 
-
 @pytest.fixture(scope="function")
 def lambda_event():
     return {'department': 'department/2025-03-01/071556.json',
