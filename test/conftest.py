@@ -336,7 +336,7 @@ def output_data_date():
         "year": [2025, 2025, 2025],
         "month": [3, 3, 3],
         "day": [3, 4, 5],
-        "day_of_week": [0, 1, 2],
+        "day_of_week": [1, 2, 3],
         "day_name": ["Monday", "Tuesday", "Wednesday"],
         "month_name": ["March", "March", "March"],
         "quarter": [1, 1, 1],
