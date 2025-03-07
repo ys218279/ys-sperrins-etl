@@ -2,7 +2,7 @@ import boto3
 from botocore.exceptions import ClientError
 import json
 from datetime import datetime
-from pg8000.native import Connection, DatabaseError, InterfaceError
+from pg8000.native import Connection, DatabaseError, InterfaceError, identifier
 import sys
 import logging
 
@@ -39,16 +39,17 @@ def entry(client):
     else:
         print("invalid client type used for secret manager! plz contact developer!")
 
+
 def retrieval(client, secret_identifier="de_2024_12_02"):
     """Retrieve a secret called de_2024_12_02 from aws secrets manager.
-    
+
     Keyword arguments:
     - client (boto3.client): AWS secrets manager client
     - secret_identifier (str): Name of secret storing totesys credentials
 
     Returns:
     - res_dict (dict): returns secrets for the Totesys DB connection in dict format
-    
+
     Exceptions raised:
     - ResourceNotFoundException: secret ID does not exist.
     """
@@ -70,7 +71,7 @@ def retrieval(client, secret_identifier="de_2024_12_02"):
 
 def connect_to_db(secret_identifier="de_2024_12_02"):
     """Establish connection to totesys database
-    
+
     Returns:
     - pg8000.native.Connection: Connection to totesys database
     """
@@ -93,7 +94,7 @@ def connect_to_db(secret_identifier="de_2024_12_02"):
 
 def close_db_connection(conn):
     """Close connection to totesys database
-    
+
     Keyword arguements:
     - conn (pg8000.native.Connection): Connection to totesys database
     """
@@ -105,10 +106,10 @@ def close_db_connection(conn):
 
 def get_s3_client():
     """Creates s3 client returns client
-    
+
     Return:
     - boto3.client: S3 client object
-    
+
     Exceptions raised:
     - ClientError: Failed to connect to s3 client, general exception.
     """
@@ -130,10 +131,10 @@ def get_s3_client():
 
 def get_secrets_manager_client():
     """Creates secretsmanager client returns client
-    
+
     Returns:
     - boto3.client: Secretsmanager client object
-    
+
     Exceptions raised:
     - ClientError: Failed to connect to secretsmanager client, general exception.
     """
@@ -155,12 +156,12 @@ def get_secrets_manager_client():
 
 def upload_to_s3(bucket_name, table, result, s3_client):
     """Upload the file to s3 bucket, returns the object name
-    
+
     Keyword arguments:
     - bucket_name (str): Name for the ingestion bucket
     - table (str): Table from totesys database
     - result (str): table file name
-    
+
     Returns:
     - Date formatted json filename (str)
     """
@@ -179,14 +180,15 @@ def upload_to_s3(bucket_name, table, result, s3_client):
         logger.critical("Unable to put %s object in ingestion s3 bucket , %s", str(table), str(err))
     
 
+
 def fetch_latest_update_time_from_s3(client, bucket_name, table_name):
     """Fetch latest file loaded to s3 bucket, returns this time
-    
+
     Keyword arguments:
     - client (boto3.client): S3 client
     - bucket_name (str): Ingestion s3 bucket name
     - table_name (str): Table from totesys database name
-    
+
     Returns:
     - Latest uploaded file time (int)
     """
@@ -206,13 +208,14 @@ def fetch_latest_update_time_from_s3(client, bucket_name, table_name):
     except Exception as err2:
         logger.critical("Unable to return the time of the latest loaded file %s to s3, %s", str(table_name),  str(err2))
 
+
 def fetch_latest_update_time_from_db(conn, table_name):
     """Fetch the latest update of the table in db, returns the latest update time
-    
+
     Required input argument:
     - conn (pg8000.native.Connection): Connection to totesys database
     - table_name (str): Table from totesys database name
-    
+
     Returns:
     - Latest updated table in database (int)
     """
@@ -225,4 +228,21 @@ def fetch_latest_update_time_from_db(conn, table_name):
         return formatted_res
     except Exception as err:
         logger.critical("Unable to return the time of the latest update of table %s, %s", str(table_name),  str(err))
+
+
+def fetch_snapshot_of_table_from_db(conn, table_name):
+    """Fetch a snapshot of one table from ToteSys in it's current state.
+
+    Required input argument:
+    - conn (pg8000.native.Connection): Connection to totesys database
+    - table_name (str): Table from totesys database name
+
+    Returns:
+    - Dictionary containing column names and raw data from the named table.
+    """
+    raw_data = conn.run(f"SELECT * FROM {identifier(table_name)};")
+    columns = [col["name"] for col in conn.columns]
+    result = {"columns": columns, "data": raw_data}
+    return result
+
 

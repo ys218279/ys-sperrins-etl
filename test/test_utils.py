@@ -4,6 +4,7 @@ from src.src_ingestion.utils import (
     upload_to_s3,
     fetch_latest_update_time_from_s3,
     fetch_latest_update_time_from_db,
+    fetch_snapshot_of_table_from_db,
     retrieval,
     connect_to_db,
     close_db_connection
@@ -149,6 +150,16 @@ class TestRetrieval:
                     "An error occurred (ResourceNotFoundException) when calling the GetSecretValue operation"
                     in result
                 )
+
+class TestFetchSnapshotOfWholeTable:
+    def test_returns_dictionary_result_with_columns_and_data_keys(self, ):
+        mock_conn = Mock()
+        mock_conn.run.return_value = [1,"Jeremie","Franey",2,"email"]
+        mock_conn.columns = [{"name": "id"},{"name": "first_name"},{"name": "last_name"},{"name": "department_id"},{"name": "email"}]
+        result = fetch_snapshot_of_table_from_db(mock_conn, "mock_table")
+        assert type(result) == dict
+        assert result["columns"]
+        assert result["data"]
 
 
 class TestLoadLambdaRetrieval:
