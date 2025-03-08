@@ -52,8 +52,6 @@ def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
                 df = pd_read_s3_parquet(s3_key, BUCKET_NAME, s3_client)
                 load_tables_to_dw(conn, df, table_name, fact_table)
         close_dw_connection(conn)
-
-      
             
       
 

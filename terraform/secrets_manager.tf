@@ -4,14 +4,14 @@ resource "aws_secretsmanager_secret" "totesys_secret" {
   force_overwrite_replica_secret = true
 }
 
-resource "aws_secretsmanager_secret_version" "totesys_secret_version" {
-  secret_id     = aws_secretsmanager_secret.totesys_secret.id
-  secret_string = jsonencode({ username = var.a_totesys_username 
-                                password = var.b_totesys_password 
-                                host = var.c_totesys_host 
-                                database = var.d_totesys_database 
-                                port = var.i_db_port })
-}
+# resource "aws_secretsmanager_secret_version" "totesys_secret_version" {
+#   secret_id     = aws_secretsmanager_secret.totesys_secret.id
+#   secret_string = jsonencode({ username = var.a_totesys_username 
+#                                 password = var.b_totesys_password 
+#                                 host = var.c_totesys_host 
+#                                 database = var.d_totesys_database 
+#                                 port = var.i_db_port })
+# }
 
 resource "aws_secretsmanager_secret" "Data_Warehouse_secret" {
   name = var.dw_credentials_secret_name
@@ -19,11 +19,21 @@ resource "aws_secretsmanager_secret" "Data_Warehouse_secret" {
   force_overwrite_replica_secret = true
 }
 
-resource "aws_secretsmanager_secret_version" "finalDW_secret_version" {
-  secret_id     = aws_secretsmanager_secret.Data_Warehouse_secret.id
-  secret_string = jsonencode({  username = var.e_final_dw_username 
-                                password = var.f_final_dw_password 
-                                host = var.g_final_dw_host 
-                                database = var.h_final_dw_database 
-                                port = var.i_db_port })
-}
+# import {
+#   to = aws_secretsmanager_secret.totesys_secret
+#   id = "arn:aws:secretsmanager:eu-west-2:783764619242:secret:de_2024_12_02-ec340Z"
+# }
+
+# import {
+#   to = aws_secretsmanager_secret.Data_Warehouse_secret
+#   id = "arn:aws:secretsmanager:eu-west-2:783764619242:secret:de_2024_12_02_dw-RuxLuD"
+# }
+
+# resource "aws_secretsmanager_secret_version" "finalDW_secret_version" {
+#   secret_id     = aws_secretsmanager_secret.Data_Warehouse_secret.id
+#   secret_string = jsonencode({  username = var.e_final_dw_username 
+#                                 password = var.f_final_dw_password 
+#                                 host = var.g_final_dw_host 
+#                                 database = var.h_final_dw_database 
+#                                 port = var.i_db_port })
+# }

@@ -9,7 +9,7 @@ import sys
 
 sys.path.append("src/src_load")
 
-def retrieval(client, secret_identifier='de_2024_12_02_dw'):
+def retrieval(client, secret_identifier='totesys_data_warehouse_olap'):
     """return the credentials to the totesys db in a dictionary"""
     if "SecretsManager" in str(type(client)):
         try:
@@ -81,14 +81,15 @@ def pd_read_s3_parquet(key, bucket, s3_client):
     df = pd.read_parquet(io.BytesIO(obj['Body'].read()), engine='pyarrow')
     return df
 
-def connect_to_dw(secret_identifier='de_2024_12_02_dw'):
+def connect_to_dw(secret_identifier='totesys_data_warehouse_olap'):
     """return conn to dw"""
     client = get_secrets_manager_client()
     credentials = retrieval(client, secret_identifier=secret_identifier)
+    
     return Connection(
         user=credentials["username"],
         password=credentials["password"],
-        database=credentials["dbname"],
+        database=credentials["database"],
         host=credentials["host"],
     )
 
@@ -179,14 +180,14 @@ def get_column_names(conn, table_name):
 def delete_all_from_dw():
     """delete all contents in dw but will keep the table structure (column names)"""
     conn = connect_to_dw()
-    tables = ['dim_date', 'dim_staff', 'dim_counterparty', 'dim_location', 'dim_currency', 'dim_design', 'fact_sales_order']
+    tables = ['fact_sales_order', 'dim_date', 'dim_staff', 'dim_counterparty', 'dim_location', 'dim_currency', 'dim_design']
     for table in tables:
         query = f"DELETE FROM {identifier(table)};"
         conn.run(query)
 
 if __name__ == "__main__":
-    conn = connect_to_dw()
-    fact_tables =  ['fact_sales_order']
+    # conn = connect_to_dw()
+    # fact_tables =  ['fact_sales_order']
     # data = {'currency_id':[1, 2], 'currency_code':["/dsa1@", "dsa/2"], "currency_name": [1, 2]}
     # df = pd.DataFrame(data).set_index('currency_id')
     # df = pd.read_parquet("/Users/jchjiangcheng/Northcoders/project/team-09-sperrins/src/src_load/143430.parquet")
@@ -203,4 +204,9 @@ if __name__ == "__main__":
     
     # print(df.head(10))
     delete_all_from_dw()
+    # client = get_secrets_manager_client()
+
+    # conn = connect_to_dw()
+    # res = conn.run("SELECT * FROM dim_currency")
+    # print(res)
    
