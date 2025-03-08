@@ -84,11 +84,14 @@ def convert_df_to_s3_obj(client, df, bucket, key):
         df.to_parquet(output_buffer)
         body = output_buffer.getvalue()
         client.put_object(Bucket=bucket, Key=key, Body=body)
+        return True
     except ClientError as e:
         logger.error("S3 Client Error when converting panda dataframe to s3 object, %s",  str(e))
         print('Client Error as: %s', str(e))
+        return False
     except Exception as e:
         logger.critical("Error when converting panda data frame to s3 object, %s",  str(e))
+        return False
 
 
 
