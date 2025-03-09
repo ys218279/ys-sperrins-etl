@@ -18,5 +18,5 @@ venv/
 terraform/.terraform**/**
 packages/
 layer/python/
-
+terraform/*.tfvars
 
