@@ -47,7 +47,7 @@ variable "python_runtime" {
 
 variable "default_timeout" {
   type    = number
-  default = 60
+  default = 180
 }
 
 variable "processed_bucket_prefix" {
