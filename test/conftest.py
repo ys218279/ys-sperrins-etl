@@ -315,16 +315,16 @@ def output_data_counterparty():
     data = {
         "counterparty_id": [1, 2, 3],
         "counterparty_legal_name": ["Paul C.", "Eli S.", "Danika R."],
-        "counterparty_address_line_1": [
+        "counterparty_legal_address_line_1": [
             "3 Church Lane",
             "10 Nelson Road",
             "4 Wilton Avenue",
         ],
-        "counterparty_address_line_2": ["Putney", "Camden", "Kew"],
-        "counterparty_district": ["Lambeth", "Merton", "Richmond"],
-        "counterparty_city": ["Manchester", "London", "Leeds"],
-        "counterparty_postal_code": ["GU1 342", "TW3 827", "YE4 978"],
-        "counterparty_phone": ["078853686554", "07576455456", "07846556544"],
+        "counterparty_legal_address_line_2": ["Putney", "Camden", "Kew"],
+        "counterparty_legal_district": ["Lambeth", "Merton", "Richmond"],
+        "counterparty_legal_city": ["Manchester", "London", "Leeds"],
+        "counterparty_legal_postal_code": ["GU1 342", "TW3 827", "YE4 978"],
+        "counterparty_legal_phone": ["078853686554", "07576455456", "07846556544"],
     }
     return pd.DataFrame(data=data).set_index('counterparty_id')
 
@@ -336,7 +336,7 @@ def output_data_date():
         "year": [2025, 2025, 2025],
         "month": [3, 3, 3],
         "day": [3, 4, 5],
-        "day_of_week": [0, 1, 2],
+        "day_of_week": [1, 2, 3],
         "day_name": ["Monday", "Tuesday", "Wednesday"],
         "month_name": ["March", "March", "March"],
         "quarter": [1, 1, 1],
@@ -364,7 +364,7 @@ def input_data_sales_order():
             "2022-11-03 14:20:49.962000",
         ],
         "design_id": [1, 2, 3],
-        "sales_staff_id": [1, 2, 3],
+        "staff_id": [1, 2, 3],
         "counterparty_id": [1, 2, 3],
         "units_sold": [12345,53422134, 9873234567],
         "unit_price": [12.34, 5.32, 9.99],

@@ -45,7 +45,7 @@ def create_dim_staff_table(df_sta, df_dep):
     df_department = df_dep.copy()
     df_staff_mod = df_staff.drop(columns=['created_at','last_updated'])
     df_department_mod = df_department.drop(columns=['created_at','last_updated', 'manager'])
-    df_dim_staff = pd.merge(df_staff_mod, df_department_mod, left_on='department_id', right_on='department_id', how='left').drop(columns=['department_id'])
+    df_dim_staff = pd.merge(df_staff_mod, df_department_mod, left_on='department_id', right_on='department_id', how='inner').drop(columns=['department_id'])
     df_dim_staff = df_dim_staff.set_index('staff_id')
     return df_dim_staff
 
@@ -78,14 +78,14 @@ def create_dim_counterparty_table(df_addr, df_cp):
     df_counterparty = df_cp.copy()
     df_address_mod = df_address.drop(columns=['created_at','last_updated'])
     df_counterparty_mod = df_counterparty.drop(columns=['created_at','last_updated', 'commercial_contact', 'delivery_contact'])
-    df_dim_counterparty = pd.merge(df_counterparty_mod, df_address_mod, left_on='legal_address_id', right_on='address_id', how='left').drop(columns=['address_id', 'legal_address_id'])
-    df_dim_counterparty_mod = df_dim_counterparty.rename(columns={'address_line_1': 'counterparty_address_line_1', 
-                                                      'address_line_2': 'counterparty_address_line_2',
-                                                      'district': 'counterparty_district',
-                                                      'city': 'counterparty_city',
-                                                      'postal_code': 'counterparty_postal_code',
-                                                      'country' : 'counterparty_country',
-                                                      'phone': 'counterparty_phone'})
+    df_dim_counterparty = pd.merge(df_counterparty_mod, df_address_mod, left_on='legal_address_id', right_on='address_id', how='inner').drop(columns=['address_id', 'legal_address_id'])
+    df_dim_counterparty_mod = df_dim_counterparty.rename(columns={'address_line_1': 'counterparty_legal_address_line_1', 
+                                                      'address_line_2': 'counterparty_legal_address_line_2',
+                                                      'district': 'counterparty_legal_district',
+                                                      'city': 'counterparty_legal_city',
+                                                      'postal_code': 'counterparty_legal_postal_code',
+                                                      'country' : 'counterparty_legal_country',
+                                                      'phone': 'counterparty_legal_phone'})
     df_dim_counterparty_mod_2 = df_dim_counterparty_mod.set_index('counterparty_id')
     return df_dim_counterparty_mod_2
 
@@ -105,7 +105,7 @@ def create_dim_date_table(start='2019/01/01', end='2030/12/31'):
     df_date["year"] = df_date.Date.dt.year
     df_date["month"] = df_date.Date.dt.month
     df_date["day"] = df_date.Date.dt.day
-    df_date["day_of_week"] = df_date.Date.dt.dayofweek 
+    df_date["day_of_week"] = df_date.Date.dt.dayofweek + 1
     df_date["day_name"] = df_date.Date.dt.day_name()
     df_date["month_name"] = df_date.Date.dt.month_name()
     df_date["quarter"] = df_date.Date.dt.quarter
@@ -128,7 +128,8 @@ def create_fact_sales_order_table(df_sales):
     df_sales_order["created_time"] = pd.to_datetime(df_sales_order["created_at"], format='ISO8601').dt.strftime('%H:%M:%S.%f')
     df_sales_order["last_updated_date"] = pd.to_datetime(df_sales_order["last_updated"], format='ISO8601').dt.strftime('%Y-%m-%d')
     df_sales_order["last_updated_time"] = pd.to_datetime(df_sales_order["last_updated"], format='ISO8601').dt.strftime('%H:%M:%S.%f')
-    df_fact_sales_order = df_sales_order.drop(columns=['created_at','last_updated']).set_index('sales_order_id')
-    return df_fact_sales_order
+    df_fact_sales_order = df_sales_order.rename(columns={'staff_id': 'sales_staff_id'})
+    df_fact_sales_order_mod = df_fact_sales_order.drop(columns=['created_at','last_updated']).set_index('sales_order_id')
+    return df_fact_sales_order_mod
 
 
