@@ -8,9 +8,9 @@ resource "aws_sfn_state_machine" "pipeline_state_machine" {
   role_arn = aws_iam_role.state_machine_role.arn
   definition = templatefile("${path.module}/mystatemachine.asl.json", {
     ProcessingLambda = "arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${var.ingestion_lambda}:$LATEST"
-    } 
+    }
   )
-  depends_on = [ aws_lambda_function.ingestion_lambda ]
+  depends_on = [aws_lambda_function.ingestion_lambda]
 }
 
 
@@ -21,7 +21,7 @@ resource "aws_scheduler_schedule" "step_function_eventbridge" {
   }
   schedule_expression = "rate(5 minute)"
   target {
-    arn = aws_sfn_state_machine.pipeline_state_machine.arn
+    arn      = aws_sfn_state_machine.pipeline_state_machine.arn
     role_arn = aws_iam_role.event_bridge_role.arn
   }
 }
