@@ -240,8 +240,11 @@ def fetch_snapshot_of_table_from_db(conn, table_name):
     Returns:
     - Dictionary containing column names and raw data from the named table.
     """
-    raw_data = conn.run(f"SELECT * FROM {identifier(table_name)};")
-    columns = [col["name"] for col in conn.columns]
-    result = {"columns": columns, "data": raw_data}
-    return result
+    try:
+        raw_data = conn.run(f"SELECT * FROM {identifier(table_name)};")
+        columns = [col["name"] for col in conn.columns]
+        result = {"columns": columns, "data": raw_data}
+        return result
+    except Exception as err:
+        logger.critical("Unable to get snapshot of table %s, %s", str(table_name),  str(err))
 
