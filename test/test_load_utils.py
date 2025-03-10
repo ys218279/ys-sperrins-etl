@@ -5,7 +5,7 @@ import pandas as pd
 from io import BytesIO
 from botocore.exceptions import ClientError
 
-from src.src_load.load_utils import pd_read_s3_parquet, get_insert_query, retrieval, load_tables_to_dw
+from src.src_load.load_utils import pd_read_s3_parquet, connect_to_dw, get_insert_query, retrieval, load_tables_to_dw
 
 def input_args():
     yield "bidenj"
@@ -16,6 +16,13 @@ def input_args():
     yield "bidenj"
     yield "Pa55word"
     yield "host"
+    yield "database"
+    yield "port"
+
+def input_args_2():
+    yield "test"
+    yield "test"
+    yield "test"
     yield "database"
     yield "port"
 
@@ -97,8 +104,7 @@ class TestLoadLambdaRetrieval:
                 retrieval(client, 11)
                 assert "critical error " in caplog.text
 
-                
-    
+                  
 class TestPdReadParquett:
     def test_pd_read_s3_parquet(self):
         with mock_aws():
@@ -119,6 +125,12 @@ class TestPdReadParquett:
             s3_client.put_object(Bucket=bucket_name, Key='test_data_parquet', Body=body)
             res_df = pd_read_s3_parquet('test_data_parquet', bucket_name, s3_client)
             pd.testing.assert_frame_equal(res_df, df)
+
+    def test_pd_read_s3_parquet_returns_critical_log(self, s3_client, create_bucket_processed, bucket_name_processed,object_key, caplog):
+        with mock_aws():
+            with caplog.at_level(logging.CRITICAL):
+                pd_read_s3_parquet(object_key,11,s3_client)
+                assert "critical error" in caplog.text
 
 class TestGetInsertQuery:
     def test_get_insert_query_not_on_conflict(self):

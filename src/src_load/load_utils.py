@@ -1,6 +1,6 @@
 import boto3, json, io, sys, logging
 from botocore.exceptions import ClientError
-from pg8000.native import Connection, identifier
+from pg8000.native import Connection, identifier, InterfaceError
 import pandas as pd
 
 sys.path.append("src/src_load")
@@ -87,20 +87,26 @@ def pd_read_s3_parquet(key, bucket, s3_client):
     Returns:
     - df
     """
-    obj = s3_client.get_object(Bucket=bucket, Key=key)
-    df = pd.read_parquet(io.BytesIO(obj['Body'].read()), engine='pyarrow')
-    return df
+    try:
+        obj = s3_client.get_object(Bucket=bucket, Key=key)
+        df = pd.read_parquet(io.BytesIO(obj['Body'].read()), engine='pyarrow')
+        return df
+    except Exception as err:
+        print(err)
+        logger.critical("There has been a critical error when attempting to read the parquet from s3 bucket, %s", str(err))
 
 def connect_to_dw(client):
     """return conn to dw"""
     credentials = retrieval(client)
-    
-    return Connection(
-        user=credentials["username"],
-        password=credentials["password"],
-        database=credentials["database"],
-        host=credentials["host"],
-    )
+    try:
+        return Connection(
+            user=credentials["username"],
+            password=credentials["password"],
+            database=credentials["database"],
+            host=credentials["host"],
+        )
+    except Exception as err:
+        logger.critical("The connection to the Data Warehouse is failing, %s", str(err))
 
 def close_dw_connection(conn):
     """close dw"""
