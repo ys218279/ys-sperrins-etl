@@ -50,7 +50,7 @@ resource "aws_cloudwatch_metric_alarm" "load_lambda_critical_alarm" {
   evaluation_periods  = 1
   metric_name         = aws_cloudwatch_log_metric_filter.load_critical_metric_filter.metric_transformation[0].name
   namespace           = "load_lambda"
-  period              = 60
+  period              = 10
   statistic           = "Sum"
   threshold           = 1
   alarm_actions       = [aws_sns_topic.team_sperrins_topic.arn]
