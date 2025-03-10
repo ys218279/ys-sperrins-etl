@@ -145,7 +145,6 @@ class TestRetrieval:
                     "An error occurred (ResourceNotFoundException) when calling the GetSecretValue operation"
                     in result
                 )
-
     def test_retrieval_secret_resource_not_found_error_log(self, caplog):
         with mock_aws():
             with caplog.at_level(logging.WARNING):
@@ -161,7 +160,7 @@ class TestRetrieval:
                 assert "There has been a critical error when attempting to retrieve secret for totesys DB credentials" in caplog.text
 
 class TestFetchSnapshotOfWholeTable:
-    def test_returns_dictionary_result_with_columns_and_data_keys(self, ):
+    def test_returns_dictionary_result_with_columns_and_data_keys(self ):
         mock_conn = Mock()
         mock_conn.run.return_value = [1,"Jeremie","Franey",2,"email"]
         mock_conn.columns = [{"name": "id"},{"name": "first_name"},{"name": "last_name"},{"name": "department_id"},{"name": "email"}]
@@ -169,6 +168,13 @@ class TestFetchSnapshotOfWholeTable:
         assert type(result) == dict
         assert result["columns"]
         assert result["data"]
+
+    def test_fetch_snapshot_handles_critical_error(self, caplog ):
+        mock_conn = Mock()
+        mock_conn.run.side_effect = TypeError
+        with caplog.at_level(logging.CRITICAL):
+            fetch_snapshot_of_table_from_db(mock_conn, "mock_table")
+            assert "Unable to get snapshot of table"
 
 class TestConnectToDB:  
     @patch("builtins.input", side_effect=input_args_2())
