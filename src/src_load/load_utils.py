@@ -120,11 +120,15 @@ def load_tables_to_dw(conn, df, table_name, fact_tables):
     - table_name (str): Name for the table
     - fact_tables (list): list of fact tables
     """
-    column_names = get_column_names(conn, table_name)
-    on_conflict = table_name not in fact_tables
-    update_query = get_insert_query(table_name, column_names, df.index.name, on_conflict=on_conflict)
-    for row in df.reset_index().to_dict(orient="records"):
-        conn.run(update_query, **row, table_name=table_name)
+    try:
+        column_names = get_column_names(conn, table_name)
+        on_conflict = table_name not in fact_tables
+        update_query = get_insert_query(table_name, column_names, df.index.name, on_conflict=on_conflict)
+        for row in df.reset_index().to_dict(orient="records"):
+            conn.run(update_query, **row, table_name=table_name)
+    except Exception as err:
+        logger.critical("Unable to load table, %s, to Data Warehouse, %s", str(table_name),  str(err))
+
 
 
 def get_insert_query(table_name, column_names, conflict_column, on_conflict):
