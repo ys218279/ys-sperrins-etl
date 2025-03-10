@@ -5,9 +5,13 @@ from pg8000.native import Connection, identifier
 import sys
 import pandas as pd
 import io
+import logging
 import sys
 
 sys.path.append("src/src_load")
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 def retrieval(client, secret_identifier='totesys_data_warehouse_olap'):
     """return the credentials to the totesys db in a dictionary"""
@@ -105,11 +109,16 @@ def load_tables_to_dw(conn, df, table_name, fact_tables):
     - table_name (str): Name for the table
     - fact_tables (list): list of fact tables
     """
-    column_names = get_column_names(conn, table_name)
-    on_conflict = table_name not in fact_tables
-    update_query = get_insert_query(table_name, column_names, df.index.name, on_conflict=on_conflict)
-    for row in df.reset_index().to_dict(orient="records"):
-        conn.run(update_query, **row, table_name=table_name)
+    try:
+        column_names = get_column_names(conn, table_name)
+        on_conflict = table_name not in fact_tables
+        update_query = get_insert_query(table_name, column_names, df.index.name, on_conflict=on_conflict)
+        for row in df.reset_index().to_dict(orient="records"):
+            conn.run(update_query, **row, table_name=table_name)
+        return True
+    except Exception as e:
+        logger.critical("Error when loading table %s into dw, %s", str(table_name), str(e))
+        return False
 
 # def get_insert_query(table_name, column_names, conflict_column, on_conflict):
 #     """Given table name and column names of the table return the conditional query

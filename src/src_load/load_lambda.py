@@ -9,6 +9,7 @@
 
 import os
 import boto3
+import logging
 from load_utils import (
     get_s3_client,
     connect_to_dw,
@@ -22,8 +23,8 @@ sys.path.append("src/src_load")
 
 BUCKET_NAME = os.environ["S3_BUCKET_NAME_PROCESSED"]
 
-
-
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
@@ -50,7 +51,11 @@ def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
         for table_name, s3_key in event.items():
             if s3_key:
                 df = pd_read_s3_parquet(s3_key, BUCKET_NAME, s3_client)
-                load_tables_to_dw(conn, df, table_name, fact_table)
+                load_result = load_tables_to_dw(conn, df, table_name, fact_table)
+                if load_result:
+                    logger.info("Loaded %s table to DW", str(table_name))
+                else:
+                    logger.info("There was a problem. %s table not loaded to DW.", str(table_name))
         close_dw_connection(conn)
             
       
