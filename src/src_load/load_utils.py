@@ -133,14 +133,15 @@ def get_insert_query(table_name, column_names, conflict_column, on_conflict):
     """
     column_names = column_names[1:] if not on_conflict else column_names
     placeholders = ", ".join([f":{column_name}" for column_name in column_names])
-    columns = ", ".join(column_names)
+    column_names_with_identifier = [f"{identifier(column_name)}" for column_name in column_names]
+    columns = ", ".join(column_names_with_identifier)
     update_set = ", ".join([f"{col} = EXCLUDED.{col}" for col in column_names[1:]])
     query = f"""INSERT INTO {table_name} ({columns})
     VALUES ({placeholders})"""
     if not on_conflict:
         return f"{query};"
     return f"""{query}
-    ON CONFLICT ({conflict_column})
+    ON CONFLICT ({identifier(conflict_column)})
     DO UPDATE SET {update_set};
     """
 
