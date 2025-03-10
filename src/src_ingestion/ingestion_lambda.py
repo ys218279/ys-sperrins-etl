@@ -44,6 +44,9 @@ def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
         - uploads that file object to the s3 bucket using the following format:
             - table_name/year-month-day-timestamp.json (i.e. YYYYMMDDHHMMSS.json)
         - finally this lambda will close the db conn.
+        
+    Exceptions:
+    - Exception: General errors within the lambda handler not picked up by exceptions in the utility functions.
 
     Important Notes:
         - Any data in a datetime format when extracted from ToteSys is coverted in to a integer format.
