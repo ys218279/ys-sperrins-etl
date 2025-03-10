@@ -21,9 +21,9 @@ def lambda_event():
         }
 
 @patch('src.src_load.load_lambda.get_s3_client')
-def test_logging_for_lambda_handler(s3_client,lambda_event, create_bucket_processed, bucket_name_processed, caplog):
+def test_logging_for_lambda_handler(mock_get_s3_client, lambda_event, bucket_name_processed, caplog):
     with mock_aws():
-        s3_client.return_value=0
+        mock_get_s3_client.side_effect = Exception("Something is wrong")
         context = DummyContext()
         with caplog.at_level(logging.INFO):
             lambda_handler(lambda_event,context, BUCKET_NAME=bucket_name_processed)

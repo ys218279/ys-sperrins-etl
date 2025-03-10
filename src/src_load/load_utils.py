@@ -55,6 +55,7 @@ def get_s3_client():
         )
 
 
+
 def get_secrets_manager_client():
     """Creates secrets manager client returns client
     
@@ -92,13 +93,12 @@ def pd_read_s3_parquet(key, bucket, s3_client):
         df = pd.read_parquet(io.BytesIO(obj['Body'].read()), engine='pyarrow')
         return df
     except Exception as err:
-        print(err)
         logger.critical("There has been a critical error when attempting to read the parquet from s3 bucket, %s", str(err))
 
 def connect_to_dw(client):
     """return conn to dw"""
-    credentials = retrieval(client)
     try:
+        credentials = retrieval(client)
         return Connection(
             user=credentials["username"],
             password=credentials["password"],

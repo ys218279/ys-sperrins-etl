@@ -132,6 +132,14 @@ class TestPdReadParquett:
                 pd_read_s3_parquet(object_key,11,s3_client)
                 assert "critical error" in caplog.text
 
+class TestConnectToDB:  
+    @patch("builtins.input", side_effect=input_args())
+    def test_connect_to_db_DatabaseError(self, mock_input, caplog):
+        with mock_aws():
+            with caplog.at_level(logging.CRITICAL):
+                connect_to_dw("test")
+                assert "The connection to the Data Warehouse is failing" in caplog.text
+
 class TestGetInsertQuery:
     def test_get_insert_query_not_on_conflict(self):
         table_name = "dim_currency"
@@ -161,6 +169,17 @@ class TestGetInsertQuery:
             "    VALUES (:sales_order_id, :created_date, :created_time, :last_updated_date, :last_updated_time, :sales_staff_id, :counterparty_id, :units_sold, :unit_price, :currency_id, :design_id, :agreed_payment_date, :agreed_delivery_date, :agreed_delivery_location_id);"
         )
         assert res.strip() == expected.strip()
+
+class TestLoadToDW:
+    @patch('src.src_load.load_utils.get_column_names')
+    def test_error_logging_load_tables_to_dw(self, mock_get_column_names, caplog):
+        mock_get_column_names.side_effect = Exception("cannot get column names")
+        with caplog.at_level(logging.CRITICAL):
+            load_tables_to_dw('conn', 'df', 'table_name', 'fact_table')
+            assert 'Unable to load table' in caplog.text
+
+
+
 
 
 
