@@ -58,6 +58,7 @@ variable "processed_bucket_prefix" {
 }
 
 
+
 variable "lambda_failure_topic_name" {
   description = "Value of the Name tag for the lambda_failure_topic_name"
   type        = string
