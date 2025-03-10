@@ -23,18 +23,15 @@ def retrieval(client, secret_identifier='totesys_data_warehouse_olap'):
     - Resource Not Found
     - Client Errors from AWS side.
     """  
-    if "SecretsManager" in str(type(client)):
-        try:
-            response = client.get_secret_value(SecretId=secret_identifier)
-            res_str = response["SecretString"]
-            res_dict = json.loads(res_str)
-            return res_dict
-        except client.exceptions.ResourceNotFoundException as err:
-            print(err)
-        except Exception as err:
-            print({"ERROR": err, "massage": "Fail to connect to aws secret manager!"})
-    else:
-        print("invalid client type used for secret manager! plz contact developer!")
+    try:
+        response = client.get_secret_value(SecretId=secret_identifier)
+        res_str = response["SecretString"]
+        res_dict = json.loads(res_str)
+        return res_dict
+    except client.exceptions.ResourceNotFoundException as err:
+        print(err)
+    except ClientError as err:
+        print({"ERROR": err, "message": "AWS Error detected and logged!"})
 
 def get_s3_client():
     """Creates s3 client returns client
@@ -93,10 +90,9 @@ def pd_read_s3_parquet(key, bucket, s3_client):
     df = pd.read_parquet(io.BytesIO(obj['Body'].read()), engine='pyarrow')
     return df
 
-def connect_to_dw(secret_identifier='totesys_data_warehouse_olap'):
+def connect_to_dw(client):
     """return conn to dw"""
-    client = get_secrets_manager_client()
-    credentials = retrieval(client, secret_identifier=secret_identifier)
+    credentials = retrieval(client)
     
     return Connection(
         user=credentials["username"],
@@ -158,7 +154,7 @@ def get_column_names(conn, table_name):
     Returns:
     - column_names (list)
     """
-    query = f"""
+    query = """
         SELECT column_name 
         FROM information_schema.columns 
         WHERE table_name = :table_name;

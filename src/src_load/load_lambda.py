@@ -1,16 +1,7 @@
-#pseudo:
-#create util file:
-    # connection to db
-    # get files from s3 bucket processed zone
-    # read data from parque files and insert into dw
-#lambda invoke utils functions
-#for facts we retrieve all files, for dim retrieve only the latest file.
-#test utils functions
-
 import os
-import boto3
 from load_utils import (
     get_s3_client,
+    get_secrets_manager_client,
     connect_to_dw,
     close_dw_connection,
     pd_read_s3_parquet,
@@ -40,15 +31,12 @@ def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
                         with table names as keys, and object keys as values (False if no new table).
             Context: supplied by AWS
     """
-    if event:
-        conn = connect_to_dw()
-        s3_client = get_s3_client()
-        fact_table =  ['fact_sales_order']
-        for table_name, s3_key in event.items():
-            if s3_key:
-                df = pd_read_s3_parquet(s3_key, BUCKET_NAME, s3_client)
-                load_tables_to_dw(conn, df, table_name, fact_table)
-        close_dw_connection(conn)
-            
-      
-
+    client_secret_manager = get_secrets_manager_client()
+    s3_client = get_s3_client()
+    conn = connect_to_dw(client_secret_manager)
+    fact_table =  ['fact_sales_order']
+    for table_name, s3_key in event.items():
+        if s3_key:
+            df = pd_read_s3_parquet(s3_key, BUCKET_NAME, s3_client)
+            load_tables_to_dw(conn, df, table_name, fact_table)
+    close_dw_connection(conn)
