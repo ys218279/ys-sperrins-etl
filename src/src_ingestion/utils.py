@@ -231,14 +231,17 @@ def fetch_latest_update_time_from_db(conn, table_name):
 
 
 def fetch_snapshot_of_table_from_db(conn, table_name):
-    """Fetch a snapshot of one table from ToteSys in it's current state.
+    """Fetch a snapshot of one table from ToteSys in it's current state returns snapshot
 
     Required input argument:
-    - conn (pg8000.native.Connection): Connection to totesys database
-    - table_name (str): Table from totesys database name
-
+     - conn (pg8000.native.Connection): Connection to totesys database
+     - table_name (str): Table from totesys database name
+     
     Returns:
-    - Dictionary containing column names and raw data from the named table.
+     - Dictionary containing column names and raw data from the named table.
+     
+    Exceptions raised:
+     - Exception: General error
     """
     try:
         raw_data = conn.run(f"SELECT * FROM {identifier(table_name)};")
