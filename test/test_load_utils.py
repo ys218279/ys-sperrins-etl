@@ -1,13 +1,11 @@
-from src.src_load.load_utils import pd_read_s3_parquet, get_insert_query, retrieval
-import io
-import boto3
-import unittest
+import boto3, io, logging, unittest, pytest, json, os
 from unittest.mock import patch, Mock
 from moto import mock_aws
-import pytest
 import pandas as pd
 from io import BytesIO
-import json
+from botocore.exceptions import ClientError
+
+from src.src_load.load_utils import pd_read_s3_parquet, get_insert_query, retrieval, load_tables_to_dw
 
 def input_args():
     yield "bidenj"
@@ -84,6 +82,21 @@ class TestLoadLambdaRetrieval:
                     "An error occurred (ResourceNotFoundException) when calling the GetSecretValue operation"
                     in result
                 )
+
+    def test_retrieval_secret_resource_not_found_error_log(self, caplog):
+        with mock_aws():
+            with caplog.at_level(logging.WARNING):
+                client = boto3.client("secretsmanager", region_name="eu-west-2")
+                retrieval(client, "secret")
+                assert "Secret does not exist" in caplog.text
+
+    def test_retrieval_secret_generates_critical_logging_error(self, caplog):
+        with mock_aws():
+            with caplog.at_level(logging.CRITICAL):
+                client = boto3.client("secretsmanager", region_name="eu-west-2")
+                retrieval(client, 11)
+                assert "critical error " in caplog.text
+
                 
     
 class TestPdReadParquett:

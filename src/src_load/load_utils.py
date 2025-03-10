@@ -1,13 +1,12 @@
-import boto3
+import boto3, json, io, sys, logging
 from botocore.exceptions import ClientError
-import json
 from pg8000.native import Connection, identifier
-import sys
 import pandas as pd
-import io
-import sys
 
 sys.path.append("src/src_load")
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 def retrieval(client, secret_identifier='totesys_data_warehouse_olap'):
     """Return the credentials to the final Data Warehouse as a dictionary.
@@ -30,8 +29,10 @@ def retrieval(client, secret_identifier='totesys_data_warehouse_olap'):
         return res_dict
     except client.exceptions.ResourceNotFoundException as err:
         print(err)
-    except ClientError as err:
-        print({"ERROR": err, "message": "AWS Error detected and logged!"})
+        logger.warning("Secret does not exist, %s", str(err))
+    except Exception as err:
+        print({"ERROR": err, "message": "Error detected and logged!"})
+        logger.critical("There has been a critical error when attempting to retrieve secret for Data Warehouse credentials, %s", str(err))
 
 def get_s3_client():
     """Creates s3 client returns client
