@@ -1,13 +1,13 @@
 {
   "Comment": "A description of my state machine",
-  "StartAt": "Lambda Ingestion",
+  "StartAt": "Lambda Invoke Ingestion",
   "States": {
-    "Lambda Ingestion": {
+    "Lambda Invoke Ingestion": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
       "Output": "{% $states.result.Payload %}",
       "Arguments": {
-        "FunctionName": "arn:aws:lambda:eu-west-2:783764619242:function:ingestion_lambda:$LATEST"
+        "FunctionName": "arn:aws:lambda:eu-west-2:699475937955:function:ingestion_lambda:$LATEST"
       },
       "Retry": [
         {
@@ -23,14 +23,14 @@
           "JitterStrategy": "FULL"
         }
       ],
-      "Next": "Lambda Transformation"
+      "Next": "Lambda Invoke Transform"
     },
-    "Lambda Transformation": {
+    "Lambda Invoke Transform": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
       "Output": "{% $states.result.Payload %}",
       "Arguments": {
-        "FunctionName": "arn:aws:lambda:eu-west-2:783764619242:function:transform_lambda:$LATEST",
+        "FunctionName": "arn:aws:lambda:eu-west-2:699475937955:function:transform_lambda:$LATEST",
         "Payload": "{% $states.input %}"
       },
       "Retry": [
@@ -47,14 +47,14 @@
           "JitterStrategy": "FULL"
         }
       ],
-      "Next": "Lambda Load"
+      "Next": "Lambda Invoke Load"
     },
-    "Lambda Load": {
+    "Lambda Invoke Load": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
       "Output": "{% $states.result.Payload %}",
       "Arguments": {
-        "FunctionName": "arn:aws:lambda:eu-west-2:783764619242:function:load_lambda:$LATEST",
+        "FunctionName": "arn:aws:lambda:eu-west-2:699475937955:function:load_lambda:$LATEST",
         "Payload": "{% $states.input %}"
       },
       "Retry": [

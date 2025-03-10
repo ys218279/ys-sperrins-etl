@@ -23,9 +23,6 @@ sys.path.append("src/src_load")
 BUCKET_NAME = os.environ["S3_BUCKET_NAME_PROCESSED"]
 
 
-
-
-
 def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
     """Main handler - This loads the data from the processed s3 bucket, into the
                     required schema for the Data Warehouse

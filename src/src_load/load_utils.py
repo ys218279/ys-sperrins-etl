@@ -10,7 +10,19 @@ import sys
 sys.path.append("src/src_load")
 
 def retrieval(client, secret_identifier='totesys_data_warehouse_olap'):
-    """return the credentials to the totesys db in a dictionary"""
+    """Return the credentials to the final Data Warehouse as a dictionary.
+    
+    Required input arguments:
+    - client = secrets manager client
+    - secret identifier (default = "totesys_data_warehouse_olap")
+
+    Returns:
+    - credentials required for connecting to db as dictionary containing key:value pairs
+
+    Errors logged and raised:
+    - Resource Not Found
+    - Client Errors from AWS side.
+    """  
     if "SecretsManager" in str(type(client)):
         try:
             response = client.get_secret_value(SecretId=secret_identifier)
@@ -111,28 +123,6 @@ def load_tables_to_dw(conn, df, table_name, fact_tables):
     for row in df.reset_index().to_dict(orient="records"):
         conn.run(update_query, **row, table_name=table_name)
 
-# def get_insert_query(table_name, column_names, conflict_column, on_conflict):
-#     """Given table name and column names of the table return the conditional query
-    
-#     Keyword arguments:
-#     - table_name (str): name of the table
-#     - column_names (list): column names of the table
-#     - on_conflict (bool): fact table or not
-    
-#     Returns:
-#     - query (string)
-#     """
-#     placeholders = ", ".join([f":{column_name}" for column_name in column_names])
-#     columns = ", ".join(column_names)
-#     update_set = ", ".join([f"{col} = EXCLUDED.{col}" for col in column_names[1:]])
-#     query = f"""INSERT INTO {table_name} ({columns})
-#     VALUES ({placeholders})"""
-#     if not on_conflict:
-#         return f"{query};"
-#     return f"""{query}
-#     ON CONFLICT ({conflict_column})
-#     DO UPDATE SET {update_set};
-#     """
 
 def get_insert_query(table_name, column_names, conflict_column, on_conflict):
     """Given table name and column names of the table return the conditional query
@@ -186,27 +176,4 @@ def delete_all_from_dw():
         conn.run(query)
 
 if __name__ == "__main__":
-    # conn = connect_to_dw()
-    # fact_tables =  ['fact_sales_order']
-    # data = {'currency_id':[1, 2], 'currency_code':["/dsa1@", "dsa/2"], "currency_name": [1, 2]}
-    # df = pd.DataFrame(data).set_index('currency_id')
-    # df = pd.read_parquet("/Users/jchjiangcheng/Northcoders/project/team-09-sperrins/src/src_load/143430.parquet")
-    # print(df.columns)
-    # res = get_column_names(conn, 'fact_sales_order')
-    # on_conflict = False
-    # column_names = res[1:] if not on_conflict else res
-    # print(column_names)
-    # load_tables_to_dw(conn, df, 'fact_sales_order', fact_tables)
-    # # updated_data = {'currency_id':[1, 2], 'currency_code':[2, 5], "currency_name": [1, 5]}
-    # # df_updated = pd.DataFrame(updated_data).set_index('currency_id')
-    # # print(df_updated)
-    # # load_tables_to_dw(conn, df_updated, "dim_currency", fact_tables)
-    
-    # print(df.head(10))
     delete_all_from_dw()
-    # client = get_secrets_manager_client()
-
-    # conn = connect_to_dw()
-    # res = conn.run("SELECT * FROM dim_currency")
-    # print(res)
-   
