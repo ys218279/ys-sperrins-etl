@@ -145,7 +145,6 @@ class TestRetrieval:
                     "An error occurred (ResourceNotFoundException) when calling the GetSecretValue operation"
                     in result
                 )
-
     def test_retrieval_secret_resource_not_found_error_log(self, caplog):
         with mock_aws():
             with caplog.at_level(logging.WARNING):
