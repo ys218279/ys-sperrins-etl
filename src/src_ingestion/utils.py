@@ -245,4 +245,3 @@ def fetch_snapshot_of_table_from_db(conn, table_name):
     result = {"columns": columns, "data": raw_data}
     return result
 
-
