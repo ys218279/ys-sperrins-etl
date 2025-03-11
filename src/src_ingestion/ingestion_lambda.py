@@ -46,7 +46,7 @@ def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
         - uploads that file object to the s3 bucket using the following format:
             - table_name/year-month-day-timestamp.json (i.e. YYYYMMDDHHMMSS.json)
         - finally this lambda will close the db conn.
-        
+
     Exceptions:
     - Exception: General errors within the lambda handler not picked up by exceptions in the utility functions.
 
@@ -59,9 +59,23 @@ def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
     try:
         conn = connect_to_db()
         client = get_s3_client()
-        table_list = ['design', 'transaction', 'sales_order', 'address', 'counterparty', 'staff', 'purchase_order', 'payment', 'payment_type', 'currency', 'department']
+        table_list = [
+            "design",
+            "transaction",
+            "sales_order",
+            "address",
+            "counterparty",
+            "staff",
+            "purchase_order",
+            "payment",
+            "payment_type",
+            "currency",
+            "department",
+        ]
         for table in table_list:
-            latest_update_s3 = fetch_latest_update_time_from_s3(client, BUCKET_NAME, table)
+            latest_update_s3 = fetch_latest_update_time_from_s3(
+                client, BUCKET_NAME, table
+            )
             latest_update_db = fetch_latest_update_time_from_db(conn, table)
             if latest_update_db > latest_update_s3:
                 latest_update_s3_dt = datetime.strptime(
@@ -78,17 +92,23 @@ def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
                     output[table] = object_name
                     logger.info("Wrote %s table to S3", str(table))
                 else:
-                    logger.info("There was a problem. %s table not written to S3.", str(table))
+                    logger.info(
+                        "There was a problem. %s table not written to S3.", str(table)
+                    )
             else:
                 output[table] = False
 
-        # Fetch full snapshot for cases where a table in DW needs a join, so it needs data from its counterpart table 
-        table_joins_lookup = {'staff':'department', 
-                            'department':'staff', 
-                            'counterparty':'address', 
-                            'address':'counterparty'}
-        list_tables_needed = [value for key,value in table_joins_lookup.items() if output[key]]
-        
+        # Fetch full snapshot for cases where a table in DW needs a join, so it needs data from its counterpart table
+        table_joins_lookup = {
+            "staff": "department",
+            "department": "staff",
+            "counterparty": "address",
+            "address": "counterparty",
+        }
+        list_tables_needed = [
+            value for key, value in table_joins_lookup.items() if output[key]
+        ]
+
         for table_name in list_tables_needed:
             result = fetch_snapshot_of_table_from_db(conn, table_name)
             object_name = upload_to_s3(BUCKET_NAME, table_name, result, client)
@@ -96,7 +116,9 @@ def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
                 output[table_name] = object_name
                 logger.info("Wrote %s table to S3", str(table_name))
             else:
-                logger.info("There was a problem. %s table not written to S3.", str(table_name))
+                logger.info(
+                    "There was a problem. %s table not written to S3.", str(table_name)
+                )
 
         close_db_connection(conn)
         return output

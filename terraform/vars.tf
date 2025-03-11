@@ -62,32 +62,32 @@ variable "processed_bucket_prefix" {
 variable "lambda_failure_topic_name" {
   description = "Value of the Name tag for the lambda_failure_topic_name"
   type        = string
-  default = "team_sperrins_topic"
-  
+  default     = "team_sperrins_topic"
+
 }
 
 variable "email_address" {
   description = "value of email used to subscribe to sns"
-  type = string
+  type        = string
 }
 variable "totesys_credentials_secret_name" {
   description = "Name of secret containing totesys db credentials"
-  type = string
-  default = "de_2024_12_02"
-  sensitive = true
+  type        = string
+  default     = "de_2024_12_02"
+  sensitive   = true
 }
 
 variable "dw_credentials_secret_name" {
   description = "Name of secret containing final Data Warehouse db credentials"
-  type = string
-  default = "totesys_data_warehouse_olap"
-  sensitive = true
+  type        = string
+  default     = "totesys_data_warehouse_olap"
+  sensitive   = true
 }
 
 variable "i_db_port" {
   description = "Please enter your totesys DB port: "
-  type = string
-  default = 5432
+  type        = string
+  default     = 5432
 }
 
 #INTERACTIVE VARIABLES
