@@ -59,8 +59,15 @@ def lambda_handler(event, context):
                         'dim_staff' : False ...}
       }"""
     try:
-        output_event = {table: False for table in table_transform_map.keys()}
-        output_event["dim_date"] = False
+        output_event = {
+            "dim_design": False,
+            "dim_currency": False,
+            "dim_staff": False,
+            "dim_location": False,
+            "dim_counterparty": False,
+            "dim_date": False,
+            "fact_sales_order": False,
+        }
         y_m_d = datetime.now().strftime("%Y-%m-%d")
         filename = datetime.now().strftime("%H%M%S")
         s3_client = get_s3_client()
