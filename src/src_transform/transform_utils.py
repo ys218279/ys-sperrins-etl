@@ -32,9 +32,9 @@ def get_s3_client():
 def get_s3_object(client, bucket, key):
     """Gets the file from s3 bucket
     
-    Keyword arguments:
+    Positional arguments:
     - client (boto3.client): s3 client
-    - bucket_name (str): Name for the ingestion bucket
+    - bucket (str): Name for the ingestion bucket
     - key (str): table file name
     
     Returns:
@@ -55,7 +55,7 @@ def get_s3_object(client, bucket, key):
 def convert_s3_obj_to_df(s3_obj_dict):
     """Converts s3 object contents to panda dataframe
     
-    Keyword arguments:
+    Positional arguments:
     - s3_obj_dict (dict): s3 object dictionary response
     
     Returns:
@@ -83,11 +83,11 @@ def convert_s3_obj_to_df(s3_obj_dict):
 def convert_df_to_s3_obj(client, df, bucket, key):
     """Converts panda dataframe to s3 parquet object
     
-    Keyword arguments:
+    Positional arguments:
     - client (boto3.client): s3 client
+    - df (panda df obj): The table in dataframe format
     - bucket (str): Name for the processed bucket
     - key (str): table file name
-    - df (panda df obj): The table in dataframe format
     
     Exceptions:
     - ClientError: Cannot connect to s3 client

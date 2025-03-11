@@ -30,6 +30,7 @@ def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
                         event is a dictionary that is passed in by StateMachine payload 
                         with table names as keys, and object keys as values (False if no new table).
             Context: supplied by AWS
+            BUCKET_NAME: default name supplied by os.environ variable S3_BUCKET_NAME_PROCESSED
     """
     client_secret_manager = get_secrets_manager_client()
     s3_client = get_s3_client()

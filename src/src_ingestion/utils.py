@@ -43,9 +43,10 @@ def entry(client):
 def retrieval(client, secret_identifier="de_2024_12_02"):
     """Retrieve a secret called de_2024_12_02 from aws secrets manager
 
-    Keyword arguments:
+    Arguments:
     - client (boto3.client): AWS secrets manager client
     - secret_identifier (str): Name of secret storing totesys credentials
+                                Default = de_2024_12_02
 
     Returns:
     - res_dict (dict): Returns secret for the Totesys DB connection in dict format
@@ -73,8 +74,9 @@ def retrieval(client, secret_identifier="de_2024_12_02"):
 def connect_to_db(secret_identifier="de_2024_12_02"):
     """Establish connection to totesys database returns connection
     
-    Keyword arguments:
+    Keyword argument:
     - secret_identifier (str): Name of secret storing totesys credentials
+                                Default = de_2024_12_02
 
     Returns:
     - pg8000.native.Connection: Connection to totesys database
@@ -102,7 +104,7 @@ def connect_to_db(secret_identifier="de_2024_12_02"):
 def close_db_connection(conn):
     """Close connection to totesys database
 
-    Keyword arguements:
+    Positional argument:
     - conn (pg8000.native.Connection): Connection to totesys database
     
     Exceptions:
@@ -167,7 +169,7 @@ def get_secrets_manager_client():
 def upload_to_s3(bucket_name, table, result, s3_client):
     """Uploads given file to s3 bucket
 
-    Keyword arguments:
+    Positional arguments:
     - bucket_name (str): Name for the ingestion bucket
     - table (str): Table from totesys database
     - result (str): Table file name
@@ -198,7 +200,7 @@ def upload_to_s3(bucket_name, table, result, s3_client):
 def fetch_latest_update_time_from_s3(client, bucket_name, table_name):
     """Fetch latest file loaded to s3 bucket
 
-    Keyword arguments:
+    Positional arguments:
     - client (boto3.client): S3 client
     - bucket_name (str): Ingestion s3 bucket name
     - table_name (str): Table from totesys database name
@@ -230,7 +232,7 @@ def fetch_latest_update_time_from_s3(client, bucket_name, table_name):
 def fetch_latest_update_time_from_db(conn, table_name):
     """Fetch the latest update of the table in db
 
-    Required input argument:
+    Positional arguments:
     - conn (pg8000.native.Connection): Connection to totesys database
     - table_name (str): Table from totesys database name
 
@@ -254,7 +256,7 @@ def fetch_latest_update_time_from_db(conn, table_name):
 def fetch_snapshot_of_table_from_db(conn, table_name):
     """Fetch a snapshot of one table from ToteSys in it's current state
 
-    Required input argument:
+    Positional arguments:
      - conn (pg8000.native.Connection): Connection to totesys database
      - table_name (str): Table from totesys database name
      

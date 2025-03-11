@@ -84,9 +84,9 @@ def get_secrets_manager_client():
 def pd_read_s3_parquet(key, bucket, s3_client):
     """Gets the parquet from s3 bucket, returns dataframe
     
-    Keyword arguments:
+    Positional arguments:
     - key (str): object name of the parquet
-    - bucket_name (str): Name for the processing bucket
+    - bucket (str): Name for the processing bucket
     - s3_client (boto3.client): s3 client
     
     Returns:
@@ -99,7 +99,7 @@ def pd_read_s3_parquet(key, bucket, s3_client):
 def connect_to_dw(client):
     """Establish connection to data warehouse DB
     
-    Keyword arguments:
+    Positional arguments:
     - client (boto3.client): secret manager client
 
     Returns:
@@ -124,8 +124,9 @@ def close_dw_connection(conn):
 def load_tables_to_dw(conn, df, table_name, fact_tables):
     """Load dataframe to data warehouse
     
-    Keyword arguments:
+    Positional arguments:
     - conn (Connection): connection to dw
+    - df (panda df obj): The table in dataframe format
     - table_name (str): Name for the table
     - fact_tables (list): list of fact tables
     """
@@ -139,9 +140,10 @@ def load_tables_to_dw(conn, df, table_name, fact_tables):
 def get_insert_query(table_name, column_names, conflict_column, on_conflict):
     """Given table name and column names of the table return the conditional query
     
-    Keyword arguments:
+    Positional arguments:
     - table_name (str): name of the table
     - column_names (list): column names of the table
+    - conflict_column (str): column name of the column with the primary key
     - on_conflict (bool): fact table or not
     
     Returns:
@@ -164,7 +166,7 @@ def get_insert_query(table_name, column_names, conflict_column, on_conflict):
 def get_column_names(conn, table_name):
     """Given table name return a list of column names
     
-    Keyword arguments:
+    Positional arguments:
     - conn (Connection): connection to data warehouse
     - table_name (str): name of the table
     
