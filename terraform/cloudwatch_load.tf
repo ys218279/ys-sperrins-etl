@@ -2,8 +2,8 @@
 #Alarm for errors
 
 
-resource "aws_cloudwatch_log_metric_filter" "load_error_metric_filter"{
-    name           = "Errors_for_load_lambda"
+resource "aws_cloudwatch_log_metric_filter" "load_error_metric_filter" {
+  name           = "Errors_for_load_lambda"
   pattern        = "ERROR"
   log_group_name = "/aws/lambda/${var.load_lambda}"
 
@@ -30,7 +30,7 @@ resource "aws_cloudwatch_metric_alarm" "load_lambda_error_alarm" {
 
 #==================================================================================================================================================================
 #Alarm for critical errors
-resource "aws_cloudwatch_log_metric_filter" "load_critical_metric_filter"{
+resource "aws_cloudwatch_log_metric_filter" "load_critical_metric_filter" {
   name           = "Critical_errors_for_load_lambda"
   pattern        = "CRITICAL"
   log_group_name = "/aws/lambda/${var.load_lambda}"

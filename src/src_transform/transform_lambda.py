@@ -48,8 +48,8 @@ def lambda_handler(event, context):
                       event is a dictionary that is passed in by StateMachine payload
                       with table names as keys, and object keys as values (False if no new table).
           Context: supplied by AWS
-        
-        
+
+
       Exceptions:
       - Exception: General errors within the lambda handler not picked up by exceptions in the utility functions and pandas functions.
 

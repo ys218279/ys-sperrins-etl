@@ -7,7 +7,7 @@ from src.src_ingestion.utils import (
     fetch_snapshot_of_table_from_db,
     retrieval,
     connect_to_db,
-    close_db_connection
+    close_db_connection,
 )
 import boto3
 import unittest
@@ -19,6 +19,7 @@ import io
 import logging
 import datetime
 from pg8000.native import Connection
+
 
 def input_args():
     yield "bidenj"
@@ -32,6 +33,7 @@ def input_args():
     yield "database"
     yield "port"
 
+
 def input_args_2():
     yield "bidenj"
     yield "Pa55word"
@@ -39,8 +41,9 @@ def input_args_2():
     yield "database"
     yield "port"
     # yield "abc"
-    
-def entry(client,secret_identifier = "de_2024_12_02"):
+
+
+def entry(client, secret_identifier="de_2024_12_02"):
     """Use to create the initial TEST secret"""
     if "SecretsManager" in str(type(client)):
         get_username = "test"
@@ -145,38 +148,50 @@ class TestRetrieval:
                     "An error occurred (ResourceNotFoundException) when calling the GetSecretValue operation"
                     in result
                 )
+
     def test_retrieval_secret_resource_not_found_error_log(self, caplog):
         with mock_aws():
             with caplog.at_level(logging.WARNING):
                 client = boto3.client("secretsmanager", region_name="eu-west-2")
                 retrieval(client, "secret")
                 assert "Secret does not exist" in caplog.text
-        
+
     def test_retrieval_secret_general_critical_log(self, caplog):
         with mock_aws():
             with caplog.at_level(logging.CRITICAL):
                 client = boto3.client("secretsmanager", region_name="eu-west-2")
                 retrieval(client, 11)
-                assert "There has been a critical error when attempting to retrieve secret for totesys DB credentials" in caplog.text
+                assert (
+                    "There has been a critical error when attempting to retrieve secret for totesys DB credentials"
+                    in caplog.text
+                )
+
 
 class TestFetchSnapshotOfWholeTable:
-    def test_returns_dictionary_result_with_columns_and_data_keys(self ):
+    def test_returns_dictionary_result_with_columns_and_data_keys(self):
         mock_conn = Mock()
-        mock_conn.run.return_value = [1,"Jeremie","Franey",2,"email"]
-        mock_conn.columns = [{"name": "id"},{"name": "first_name"},{"name": "last_name"},{"name": "department_id"},{"name": "email"}]
+        mock_conn.run.return_value = [1, "Jeremie", "Franey", 2, "email"]
+        mock_conn.columns = [
+            {"name": "id"},
+            {"name": "first_name"},
+            {"name": "last_name"},
+            {"name": "department_id"},
+            {"name": "email"},
+        ]
         result = fetch_snapshot_of_table_from_db(mock_conn, "mock_table")
         assert type(result) == dict
         assert result["columns"]
         assert result["data"]
 
-    def test_fetch_snapshot_handles_critical_error(self, caplog ):
+    def test_fetch_snapshot_handles_critical_error(self, caplog):
         mock_conn = Mock()
         mock_conn.run.side_effect = TypeError
         with caplog.at_level(logging.CRITICAL):
             fetch_snapshot_of_table_from_db(mock_conn, "mock_table")
             assert "Unable to get snapshot of table"
 
-class TestConnectToDB:  
+
+class TestConnectToDB:
     @patch("builtins.input", side_effect=input_args_2())
     def test_connect_to_db_DatabaseError(self, mock_input, caplog):
         with mock_aws():
@@ -184,16 +199,19 @@ class TestConnectToDB:
                 with patch("sys.stdout", new=io.StringIO()) as fake_out:
                     connect_to_db("test")
                     assert "The connection to the totesys DB is failing" in caplog.text
-                    
+
+
 class TestCloseDBConnection:
     def test_close_db_connection_exception(self, caplog):
         with mock_aws():
             with caplog.at_level(logging.WARNING):
                 connection = "test"
                 close_db_connection(connection)
-                assert "The connection to the totesys DB is not able to close" in caplog.text
-                
-                    
+                assert (
+                    "The connection to the totesys DB is not able to close"
+                    in caplog.text
+                )
+
 
 class TestGetS3Client(unittest.TestCase):
     def test_get_s3_client_success(self):
@@ -214,7 +232,9 @@ class TestGetS3Client(unittest.TestCase):
 class TestGetSMClient(unittest.TestCase):
     def test_get_s3_client_success(self):
         client = get_secrets_manager_client()
-        assert "SecretsManager" in str(type(boto3.client("secretsmanager", region_name="eu-west-2")))
+        assert "SecretsManager" in str(
+            type(boto3.client("secretsmanager", region_name="eu-west-2"))
+        )
 
     @patch("boto3.client")
     def test_get_s3_client_fail(self, mock_boto_client):
@@ -248,8 +268,7 @@ class TestUploadS3:
             s3_object = client.get_object(Bucket=bucket_name, Key=object_name)
             content = json.loads(s3_object["Body"].read().decode("utf-8"))
             assert content == result
-    
-   
+
     def test_upload_to_s3_client_error(self, caplog):
         with mock_aws():
             client = boto3.client("s3", region_name="eu-west-2")
@@ -260,8 +279,6 @@ class TestUploadS3:
                 upload_to_s3(bucket_name, table, result, client)
                 assert "Unable to put" in caplog.text
                 assert "object in ingestion s3 bucket" in caplog.text
-        
-            
 
 
 class TestFetchLatestUpdateS3:
@@ -284,7 +301,7 @@ class TestFetchLatestUpdateS3:
                 fetch_latest_update_time_from_s3(client, bucket_name, "table")
                 == 20250302140516
             )
-    
+
     def test_fetch_latest_time_from_s3_client_error(self, caplog):
         with mock_aws():
             client = boto3.client("s3", region_name="eu-west-2")
@@ -304,18 +321,20 @@ class TestFetchLatestUpdateS3:
             with caplog.at_level(logging.CRITICAL):
                 fetch_latest_update_time_from_s3(client, bucket_name, table)
                 assert "Unable to return the time of the latest" in caplog.text
-                
+
 
 class TestFectchLatestUpdateDB:
     def test_fetch_latest_upload_when_s3_is_empty(self):
         mock_conn = Mock()
-        mock_conn.run.return_value = [[datetime.datetime(2022, 11, 3, 14, 20, 49, 962000)]]
+        mock_conn.run.return_value = [
+            [datetime.datetime(2022, 11, 3, 14, 20, 49, 962000)]
+        ]
         result = fetch_latest_update_time_from_db(mock_conn, "mock_table")
         assert result == 20221103142049
-   
+
     def test_fetch_latest_time_from_db_critical(self, caplog):
         with mock_aws():
-            conn = 'test'
+            conn = "test"
             table = 5
             with caplog.at_level(logging.CRITICAL):
                 fetch_latest_update_time_from_db(conn, table)
