@@ -37,7 +37,10 @@ def get_s3_client():
     """Creates s3 client returns client
     
     Return:
-    - boto3.client: S3 client object
+    - boto3.client: S3 client 
+    
+    Errors logged and raised:
+    - Client Errors from AWS side.
     """
     try:
         client = boto3.client("s3", region_name="eu-west-2")
@@ -59,6 +62,9 @@ def get_secrets_manager_client():
     
     Return:
     - boto3.client: secrets manager client object
+
+    Errors logged and raised:
+    - Client Errors from AWS side.
     """
     try:
         client = boto3.client("secretsmanager", region_name="eu-west-2")
@@ -84,14 +90,24 @@ def pd_read_s3_parquet(key, bucket, s3_client):
     - s3_client (boto3.client): s3 client
     
     Returns:
-    - df
+    - df: dataframe of data obtained from the processed-zone bucket 
     """
     obj = s3_client.get_object(Bucket=bucket, Key=key)
     df = pd.read_parquet(io.BytesIO(obj['Body'].read()), engine='pyarrow')
     return df
 
 def connect_to_dw(client):
-    """return conn to dw"""
+    """Establish connection to data warehouse DB
+    
+    Keyword arguments:
+    - client (boto3.client): secret manager client
+
+    Returns:
+    - pg8000.native.Connection: Connection to data warehouse database
+    
+    Exceptions:
+    - InteraceError: Failed to connect to secrets manager client
+    """
     credentials = retrieval(client)
     
     return Connection(
@@ -149,7 +165,7 @@ def get_column_names(conn, table_name):
     """Given table name return a list of column names
     
     Keyword arguments:
-    - conn (Connection): connection to dw
+    - conn (Connection): connection to data warehouse
     - table_name (str): name of the table
     
     Returns:
