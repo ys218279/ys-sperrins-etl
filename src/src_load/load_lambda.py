@@ -17,9 +17,9 @@ logger.setLevel(logging.INFO)
 BUCKET_NAME = os.environ["S3_BUCKET_NAME_PROCESSED"]
 
 def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
-    """Main handler - This loads the data from the processed s3 bucket, into the
+    """ Main handler - This loads the data from the processed s3 bucket, into the
                     required schema for the Data Warehouse
-      Args:
+        Args:
             Event: {
                     "dim_design": "dim_design/2025-03-06/224349.parquet",
                     "dim_currency": False,
@@ -32,6 +32,8 @@ def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
                         event is a dictionary that is passed in by StateMachine payload 
                         with table names as keys, and object keys as values (False if no new table).
             Context: supplied by AWS
+        Exceptions:
+        - Exception: General error
     """
     conn = None
     try:

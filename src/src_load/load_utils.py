@@ -1,7 +1,8 @@
 import boto3, json, io, sys, logging
 from botocore.exceptions import ClientError
-from pg8000.native import Connection, identifier, InterfaceError
+from pg8000.native import Connection, identifier, DatabaseError
 import pandas as pd
+
 
 sys.path.append("src/src_load")
 
@@ -18,9 +19,9 @@ def retrieval(client, secret_identifier='totesys_data_warehouse_olap'):
     Returns:
     - credentials required for connecting to db as dictionary containing key:value pairs
 
-    Errors logged and raised:
-    - Resource Not Found
-    - Client Errors from AWS side.
+    Exceptions:
+    - ResourceNotFoundException: Secret does not exist
+    - Exception: General error
     """  
     try:
         response = client.get_secret_value(SecretId=secret_identifier)
@@ -39,11 +40,15 @@ def get_s3_client():
     
     Return:
     - boto3.client: S3 client object
+
+    Exceptions:
+    - ClientError: Unable to create s3 client
     """
     try:
         client = boto3.client("s3", region_name="eu-west-2")
         return client
-    except ClientError:
+    except ClientError as err:
+        logger.error("Unable to create s3 client, %s",  str(err))
         raise ClientError(
             {
                 "Error": {
@@ -61,11 +66,15 @@ def get_secrets_manager_client():
     
     Return:
     - boto3.client: secrets manager client object
+
+    Exception:
+    - ClientError: Unable to create secrets manager client
     """
     try:
         client = boto3.client("secretsmanager", region_name="eu-west-2")
         return client
     except ClientError:
+        logger.error("Unable to create secrets manager client, %s",  str(err))
         raise ClientError(
             {
                 "Error": {
@@ -87,6 +96,9 @@ def pd_read_s3_parquet(key, bucket, s3_client):
     
     Returns:
     - df
+
+    Exceptions:
+    - Exception: General error
     """
     try:
         obj = s3_client.get_object(Bucket=bucket, Key=key)
@@ -96,7 +108,13 @@ def pd_read_s3_parquet(key, bucket, s3_client):
         logger.critical("There has been a critical error when attempting to read the parquet from s3 bucket, %s", str(err))
 
 def connect_to_dw(client):
-    """return conn to dw"""
+    """
+    Return:
+    - conn: connection to dw
+    
+    Exceptions:
+    - Exception: General error
+    """
     try:
         credentials = retrieval(client)
         return Connection(
@@ -119,15 +137,21 @@ def load_tables_to_dw(conn, df, table_name, fact_tables):
     - conn (Connection): connection to dw
     - table_name (str): Name for the table
     - fact_tables (list): list of fact tables
+
+    Exceptions:
+    - Exception: General error
     """
     try:
         column_names = get_column_names(conn, table_name)
         on_conflict = table_name not in fact_tables
         update_query = get_insert_query(table_name, column_names, df.index.name, on_conflict=on_conflict)
+        count_row = 0
         for row in df.reset_index().to_dict(orient="records"):
             conn.run(update_query, **row, table_name=table_name)
+            count_row += 1
+        logger.info("loaded %s rows to dw", str(count_row))
     except Exception as err:
-        logger.critical("Unable to load table, %s, to Data Warehouse, %s", str(table_name),  str(err))
+        logger.critical("Unable to load table, %s, to Data Warehouse, %s", table_name,  str(err))
 
 
 
@@ -165,18 +189,30 @@ def get_column_names(conn, table_name):
     
     Returns:
     - column_names (list)
+
+    Exceptions:
+    - DatabaseError: failed to connect to dw
+    - Exception: General error
     """
-    query = """
-        SELECT column_name 
-        FROM information_schema.columns 
-        WHERE table_name = :table_name;
-    """
-    result = conn.run(query, table_name=table_name)
-    return [row[0] for row in result]
+    try:
+        query = """
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = :table_name;
+        """
+        result = conn.run(query, table_name=table_name)
+        return [row[0] for row in result]
+    except DatabaseError as err:
+        logger.critical("failed to connect to dw, %s", str(err))
+    except Exception as err:
+        logger.critical("Something goes wrong, %s", str(err))
 
 
 def delete_all_from_dw():
-    """delete all contents in dw but will keep the table structure (column names)"""
+    """
+    THIS FUNC WILL NOT BE USED IN DEPLOYMENT
+    delete all contents in dw but will keep the table structure (column names)
+    """
     conn = connect_to_dw()
     tables = ['fact_sales_order', 'dim_date', 'dim_staff', 'dim_counterparty', 'dim_location', 'dim_currency', 'dim_design']
     for table in tables:

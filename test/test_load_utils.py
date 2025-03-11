@@ -1,11 +1,18 @@
-import boto3, io, logging, unittest, pytest, json, os
+import boto3, io, logging, unittest, json
 from unittest.mock import patch, Mock
 from moto import mock_aws
 import pandas as pd
 from io import BytesIO
 from botocore.exceptions import ClientError
+from pg8000 import DatabaseError, InterfaceError
 
-from src.src_load.load_utils import pd_read_s3_parquet, connect_to_dw, get_insert_query, retrieval, load_tables_to_dw
+from src.src_load.load_utils import (pd_read_s3_parquet, 
+                                    connect_to_dw,
+                                    get_insert_query, 
+                                    retrieval, 
+                                    load_tables_to_dw, 
+                                    get_column_names, 
+                                    get_s3_client)
 
 def input_args():
     yield "bidenj"
@@ -16,13 +23,6 @@ def input_args():
     yield "bidenj"
     yield "Pa55word"
     yield "host"
-    yield "database"
-    yield "port"
-
-def input_args_2():
-    yield "test"
-    yield "test"
-    yield "test"
     yield "database"
     yield "port"
 
@@ -104,7 +104,17 @@ class TestLoadLambdaRetrieval:
                 retrieval(client, 11)
                 assert "critical error " in caplog.text
 
-                  
+class TestGetS3Client(unittest.TestCase):
+    @patch("boto3.client")
+    def test_loggings_for_get_s3_client(self, mock_boto_client):
+        mock_boto_client.side_effect = ClientError(
+            {"Error": {"Code": "InternalError", "Message": "Simulated error"}},
+            "ListObjects",
+        )
+        with self.assertRaises(ClientError) as context:
+            get_s3_client()
+        assert "failed to connect to s3" in str(context.exception)
+
 class TestPdReadParquett:
     def test_pd_read_s3_parquet(self):
         with mock_aws():
@@ -132,7 +142,7 @@ class TestPdReadParquett:
                 pd_read_s3_parquet(object_key,11,s3_client)
                 assert "critical error" in caplog.text
 
-class TestConnectToDB:  
+class TestConnectToDW:  
     @patch("builtins.input", side_effect=input_args())
     def test_connect_to_db_DatabaseError(self, mock_input, caplog):
         with mock_aws():
@@ -177,6 +187,36 @@ class TestLoadToDW:
         with caplog.at_level(logging.CRITICAL):
             load_tables_to_dw('conn', 'df', 'table_name', 'fact_table')
             assert 'Unable to load table' in caplog.text
+
+    @patch('src.src_load.load_utils.get_insert_query')
+    @patch('src.src_load.load_utils.get_column_names')
+    def test_happy_path_logging_info_for_load_tables_to_dw(self, mock_get_column_names, mock_get_insert_query, caplog):
+        mock_get_column_names.return_value = ['column_a', 'column_b', 'column_c']
+        mock_get_insert_query.return_value = ''
+        conn = Mock()
+        conn.run.return_value = '' 
+        d = {'column_a': [1,2,3], 'column_b': [2,3,4], 'column_c': [1,3,4]}
+        df = pd.DataFrame(d)
+        fact_table = []
+        with caplog.at_level(logging.INFO):
+            load_tables_to_dw(conn, df, 'table_name', fact_table)
+            assert "loaded 3 rows to dw" in caplog.text
+
+
+class TestGetColumnNames:
+    def test_loggings_for_database_error_get_column_names(self, caplog):
+        conn = Mock()
+        conn.run.side_effect = DatabaseError("database error")
+        with caplog.at_level(logging.CRITICAL):
+            get_column_names(conn, 'table_name')
+            assert 'failed to connect to dw' in caplog.text
+
+    def test_loggings_for_other_errors_get_column_name(self, caplog):
+        conn = Mock()
+        conn.run.side_effect = InterfaceError("database error")
+        with caplog.at_level(logging.CRITICAL):
+            get_column_names(conn, 'table_name')
+            assert 'Something goes wrong,' in caplog.text
 
 
 
