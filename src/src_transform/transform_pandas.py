@@ -14,6 +14,10 @@ def create_dim_design_table(df_des):
     
     Returns:
     - df_dim_design (panda df obj): The table in dataframe format - target
+    
+    Exceptions:
+    - KeyError: Key does not exist in dictionary
+    - Exception: General error
     """
     try:
         df_design = df_des.copy().set_index('design_id')
@@ -32,6 +36,10 @@ def create_dim_currency_table(df_cur):
     
     Returns:
     - df_dim_currency (panda df obj): The table in dataframe format - target
+    
+    Exceptions:
+    - KeyError: Key does not exist in dictionary
+    - Exception: General error
     """
     try:
         df_currency = df_cur.copy().set_index('currency_id')
@@ -53,6 +61,10 @@ def create_dim_staff_table(df_sta, df_dep):
     
     Returns:
     - df_dim_staff (panda df obj): The table in dataframe format - target
+    
+    Exceptions:
+    - KeyError: Key does not exist in dictionary
+    - Exception: General error
     """
     try:
         df_staff = df_sta.copy()
@@ -75,6 +87,10 @@ def create_dim_location_table(df_addr):
     
     Returns:
     - df_dim_location_mod_2 (panda df obj): The table in dataframe format - target
+    
+    Exceptions:
+    - KeyError: Key does not exist in dictionary
+    - Exception: General error
     """
     try:
         df_address = df_addr.copy()
@@ -96,6 +112,10 @@ def create_dim_counterparty_table(df_addr, df_cp):
     
     Returns:
     - df_dim_counterparty_mod_2 (panda df obj): The table in dataframe format - target
+    
+    Exceptions:
+    - KeyError: Key does not exist in dictionary
+    - Exception: General error
     """
     try:
         df_address = df_addr.copy()
@@ -119,8 +139,7 @@ def create_dim_counterparty_table(df_addr, df_cp):
     
 
 def create_dim_date_table(start='2019/01/01', end='2030/12/31'):
-    '''
-    Creates Dimension Date in Pandas
+    """Creates Dimension Date in Pandas
 
     Keyword arguments:
     - start (str): The start date in string format
@@ -128,7 +147,12 @@ def create_dim_date_table(start='2019/01/01', end='2030/12/31'):
     
     Returns:
     - df_date_mod_2 (panda df obj): The table in dataframe format - target
-    '''
+    
+    Exceptions:
+    - ValueError: Invalid table value format
+    - Exception: General error
+    """
+    
     # Construct DIM Date Dataframe
     try:
         df_date = pd.DataFrame({"Date": pd.date_range(start=f'{start}', end=f'{end}')})
@@ -157,6 +181,10 @@ def create_fact_sales_order_table(df_sales):
     
     Returns:
     - df_fact_sales_order (panda df obj): The table in dataframe format - target
+    
+    Exceptions:
+    - KeyError: Key does not exist in dictionary
+    - Exception: General error
     """
     try:
         df_sales_order = df_sales.copy()
