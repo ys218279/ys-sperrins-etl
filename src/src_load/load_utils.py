@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 def retrieval(client, secret_identifier='totesys_data_warehouse_olap'):
-    """Return the credentials to the final Data Warehouse as a dictionary.
+    """Return the credentials to the final Data Warehouse as a dictionary
     
     Required input arguments:
     - client = secrets manager client
@@ -60,7 +60,6 @@ def get_s3_client():
         )
 
 
-
 def get_secrets_manager_client():
     """Creates secrets manager client returns client
     
@@ -107,6 +106,7 @@ def pd_read_s3_parquet(key, bucket, s3_client):
     except Exception as err:
         logger.critical("There has been a critical error when attempting to read the parquet from s3 bucket, %s", str(err))
 
+
 def connect_to_dw(client):
     """
     Return:
@@ -126,9 +126,11 @@ def connect_to_dw(client):
     except Exception as err:
         logger.critical("The connection to the Data Warehouse is failing, %s", str(err))
 
+
 def close_dw_connection(conn):
     """close dw"""
     conn.close()
+
 
 def load_tables_to_dw(conn, df, table_name, fact_tables):
     """Load dataframe to data warehouse
@@ -180,6 +182,7 @@ def get_insert_query(table_name, column_names, conflict_column, on_conflict):
     DO UPDATE SET {update_set};
     """
 
+
 def get_column_names(conn, table_name):
     """Given table name return a list of column names
     
@@ -218,6 +221,9 @@ def delete_all_from_dw():
     for table in tables:
         query = f"DELETE FROM {identifier(table)};"
         conn.run(query)
+
+
+
 
 if __name__ == "__main__":
     delete_all_from_dw()
