@@ -41,17 +41,19 @@ def entry(client):
 
 
 def retrieval(client, secret_identifier="de_2024_12_02"):
-    """Retrieve a secret called de_2024_12_02 from aws secrets manager.
+    """Retrieve a secret called de_2024_12_02 from aws secrets manager
 
-    Keyword arguments:
+    Arguments:
     - client (boto3.client): AWS secrets manager client
     - secret_identifier (str): Name of secret storing totesys credentials
+                                Default = de_2024_12_02
 
     Returns:
-    - res_dict (dict): returns secrets for the Totesys DB connection in dict format
+    - res_dict (dict): Returns secret for the Totesys DB connection in dict format
 
-    Exceptions raised:
-    - ResourceNotFoundException: secret ID does not exist.
+    Exceptions:
+    - ResourceNotFoundException: Secret ID does not exist
+    - Exception: General error
     """
     if "SecretsManager" in str(type(client)):
         try:
@@ -70,10 +72,17 @@ def retrieval(client, secret_identifier="de_2024_12_02"):
 
 
 def connect_to_db(secret_identifier="de_2024_12_02"):
-    """Establish connection to totesys database
+    """Establish connection to totesys database returns connection
+    
+    Keyword argument:
+    - secret_identifier (str): Name of secret storing totesys credentials
+                                Default = de_2024_12_02
 
     Returns:
     - pg8000.native.Connection: Connection to totesys database
+    
+    Exceptions:
+    - InteraceError: Failed to connect to s3 client
     """
     client = get_secrets_manager_client()
     credentials = retrieval(client, secret_identifier=secret_identifier)
@@ -95,8 +104,11 @@ def connect_to_db(secret_identifier="de_2024_12_02"):
 def close_db_connection(conn):
     """Close connection to totesys database
 
-    Keyword arguements:
+    Positional argument:
     - conn (pg8000.native.Connection): Connection to totesys database
+    
+    Exceptions:
+    - Exception: General error
     """
     try:
         conn.close()
@@ -111,7 +123,7 @@ def get_s3_client():
     - boto3.client: S3 client object
 
     Exceptions raised:
-    - ClientError: Failed to connect to s3 client, general exception.
+    - ClientError: Failed to connect to s3 client
     """
     try:
         client = boto3.client("s3", region_name="eu-west-2")
@@ -130,13 +142,13 @@ def get_s3_client():
 
 
 def get_secrets_manager_client():
-    """Creates secretsmanager client returns client
+    """Creates secretsmanager client
 
     Returns:
     - boto3.client: Secretsmanager client object
 
     Exceptions raised:
-    - ClientError: Failed to connect to secretsmanager client, general exception.
+    - ClientError: Failed to connect to secretsmanager client
     """
     try:
         client = boto3.client("secretsmanager", region_name="eu-west-2")
@@ -155,15 +167,19 @@ def get_secrets_manager_client():
 
 
 def upload_to_s3(bucket_name, table, result, s3_client):
-    """Upload the file to s3 bucket, returns the object name
+    """Uploads given file to s3 bucket
 
-    Keyword arguments:
+    Positional arguments:
     - bucket_name (str): Name for the ingestion bucket
     - table (str): Table from totesys database
-    - result (str): table file name
+    - result (str): Table file name
+    - s3_client (boto3.client): S3 client
 
     Returns:
     - Date formatted json filename (str)
+    
+    Exceptions:
+    - ClientError: Failed to connect to s3 client
     """
     tmp_file_path = f"/tmp/{table}.json"
     try:
@@ -182,15 +198,19 @@ def upload_to_s3(bucket_name, table, result, s3_client):
 
 
 def fetch_latest_update_time_from_s3(client, bucket_name, table_name):
-    """Fetch latest file loaded to s3 bucket, returns this time
+    """Fetch latest file loaded to s3 bucket
 
-    Keyword arguments:
+    Positional arguments:
     - client (boto3.client): S3 client
     - bucket_name (str): Ingestion s3 bucket name
     - table_name (str): Table from totesys database name
 
     Returns:
     - Latest uploaded file time (int)
+    
+    Exceptions:
+    - ClientError: Failed to connect to s3 client
+    - Exception: General error
     """
     try:   
         response = client.list_objects_v2(Bucket=bucket_name, Prefix=table_name + "/")
@@ -210,14 +230,17 @@ def fetch_latest_update_time_from_s3(client, bucket_name, table_name):
 
 
 def fetch_latest_update_time_from_db(conn, table_name):
-    """Fetch the latest update of the table in db, returns the latest update time
+    """Fetch the latest update of the table in db
 
-    Required input argument:
+    Positional arguments:
     - conn (pg8000.native.Connection): Connection to totesys database
     - table_name (str): Table from totesys database name
 
     Returns:
     - Latest updated table in database (int)
+    
+    Exceptions:
+    - Exception: General error
     """
     try:
         query = f"SELECT last_updated FROM {table_name} ORDER BY last_updated DESC LIMIT 1;"
@@ -231,16 +254,16 @@ def fetch_latest_update_time_from_db(conn, table_name):
 
 
 def fetch_snapshot_of_table_from_db(conn, table_name):
-    """Fetch a snapshot of one table from ToteSys in it's current state returns snapshot
+    """Fetch a snapshot of one table from ToteSys in it's current state
 
-    Required input argument:
+    Positional arguments:
      - conn (pg8000.native.Connection): Connection to totesys database
      - table_name (str): Table from totesys database name
      
     Returns:
      - Dictionary containing column names and raw data from the named table.
      
-    Exceptions raised:
+    Exceptions:
      - Exception: General error
     """
     try:

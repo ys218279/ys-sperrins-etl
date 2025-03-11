@@ -9,11 +9,15 @@ logger.setLevel(logging.INFO)
 def create_dim_design_table(df_des):
     """Converts source df table to target df table schema
     
-    Keyword arguments:
+    Positional arguments:
     - df_des (panda df obj): The table in dataframe format - source
     
     Returns:
     - df_dim_design (panda df obj): The table in dataframe format - target
+    
+    Exceptions:
+    - KeyError: Key does not exist in dictionary
+    - Exception: General error
     """
     try:
         df_design = df_des.copy().set_index('design_id')
@@ -27,11 +31,15 @@ def create_dim_design_table(df_des):
 def create_dim_currency_table(df_cur):
     """Converts source df table to target df table schema
     
-    Keyword arguments:
+    Positional arguments:
     - df_cur (panda df obj): The table in dataframe format - source
     
     Returns:
     - df_dim_currency (panda df obj): The table in dataframe format - target
+    
+    Exceptions:
+    - KeyError: Key does not exist in dictionary
+    - Exception: General error
     """
     try:
         df_currency = df_cur.copy().set_index('currency_id')
@@ -47,12 +55,16 @@ def create_dim_currency_table(df_cur):
 def create_dim_staff_table(df_sta, df_dep):
     """Converts two source df table to one target df table schema
     
-    Keyword arguments:
+    Positional arguments:
     - df_sta (panda df obj): The table in dataframe format - source
     - df_dep (panda df obj): The table in dataframe format - source
     
     Returns:
     - df_dim_staff (panda df obj): The table in dataframe format - target
+    
+    Exceptions:
+    - KeyError: Key does not exist in dictionary
+    - Exception: General error
     """
     try:
         df_staff = df_sta.copy()
@@ -70,11 +82,15 @@ def create_dim_staff_table(df_sta, df_dep):
 def create_dim_location_table(df_addr):
     """Converts source df table to target df table schema
     
-    Keyword arguments:
+    Positional arguments:
     - df_addr (panda df obj): The table in dataframe format - source
     
     Returns:
     - df_dim_location_mod_2 (panda df obj): The table in dataframe format - target
+    
+    Exceptions:
+    - KeyError: Key does not exist in dictionary
+    - Exception: General error
     """
     try:
         df_address = df_addr.copy()
@@ -90,12 +106,16 @@ def create_dim_location_table(df_addr):
 def create_dim_counterparty_table(df_addr, df_cp):
     """Converts two source df table to one target df table schema
     
-    Keyword arguments:
+    Positional arguments:
     - df_addr (panda df obj): The table in dataframe format - source
     - df_cp (panda df obj): The table in dataframe format - source
     
     Returns:
     - df_dim_counterparty_mod_2 (panda df obj): The table in dataframe format - target
+    
+    Exceptions:
+    - KeyError: Key does not exist in dictionary
+    - Exception: General error
     """
     try:
         df_address = df_addr.copy()
@@ -119,8 +139,7 @@ def create_dim_counterparty_table(df_addr, df_cp):
     
 
 def create_dim_date_table(start='2019/01/01', end='2030/12/31'):
-    '''
-    Creates Dimension Date in Pandas
+    """Creates Dimension Date in Pandas
 
     Keyword arguments:
     - start (str): The start date in string format
@@ -128,7 +147,12 @@ def create_dim_date_table(start='2019/01/01', end='2030/12/31'):
     
     Returns:
     - df_date_mod_2 (panda df obj): The table in dataframe format - target
-    '''
+    
+    Exceptions:
+    - ValueError: Invalid table value format
+    - Exception: General error
+    """
+    
     # Construct DIM Date Dataframe
     try:
         df_date = pd.DataFrame({"Date": pd.date_range(start=f'{start}', end=f'{end}')})
@@ -152,11 +176,15 @@ def create_dim_date_table(start='2019/01/01', end='2030/12/31'):
 def create_fact_sales_order_table(df_sales):
     """Converts source df table to target df table schema
     
-    Keyword arguments:
+    Positional arguments:
     - df_sales (panda df obj): The table in dataframe format - source
     
     Returns:
     - df_fact_sales_order (panda df obj): The table in dataframe format - target
+    
+    Exceptions:
+    - KeyError: Key does not exist in dictionary
+    - Exception: General error
     """
     try:
         df_sales_order = df_sales.copy()

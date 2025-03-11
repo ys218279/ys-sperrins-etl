@@ -24,8 +24,10 @@ BUCKET_NAME = os.environ["S3_BUCKET_NAME"]
 def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
     """Ingestion Lambda to put the latest data from ToteSys in the ingestion_zone_S3 bucket.
 
-    Required Input Arguments:
-    BUCKET_NAME = The S3 Bucket Name that the handler will write to.
+    Input Arguments:
+    - event: trigger provided by AWS step machine
+    - context: supplied by AWS
+    - BUCKET_NAME = The S3 Bucket Name that the handler will write to.
         - Defaults to the available ENVIRONMENT VARIABLE: "S3_BUCKET_NAME".
 
     Returned Output:
@@ -44,6 +46,9 @@ def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
         - uploads that file object to the s3 bucket using the following format:
             - table_name/year-month-day-timestamp.json (i.e. YYYYMMDDHHMMSS.json)
         - finally this lambda will close the db conn.
+        
+    Exceptions:
+    - Exception: General errors within the lambda handler not picked up by exceptions in the utility functions.
 
     Important Notes:
         - Any data in a datetime format when extracted from ToteSys is coverted in to a integer format.

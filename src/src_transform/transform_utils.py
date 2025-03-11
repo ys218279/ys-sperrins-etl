@@ -10,13 +10,16 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 def get_s3_client():
-    """Creates s3 client returns client
+    """Creates s3 client
     
-    Return:
+    Returns:
     - boto3.client: S3 client object
     
+    Exceptions:
+    - ClientError: Cannot create s3 client
+    
     Exceptions raised:
-    - Runtime Error: "failed to connect to s3, error message as 'error'."
+    - RuntimeError: "failed to connect to s3, error message as 'error'."
     """
     try:
         client = boto3.client('s3')
@@ -27,15 +30,18 @@ def get_s3_client():
 
 
 def get_s3_object(client, bucket, key):
-    """Gets the file from s3 bucket, returns the object dict
+    """Gets the file from s3 bucket
     
-    Keyword arguments:
+    Positional arguments:
     - client (boto3.client): s3 client
-    - bucket_name (str): Name for the ingestion bucket
+    - bucket (str): Name for the ingestion bucket
     - key (str): table file name
     
     Returns:
     - s3 object dictionary response
+    
+    Exceptions:
+    - ClientError: Cannot connect to s3 client
     """
     try:
         s3_obj = client.get_object(Bucket=bucket, Key=key)
@@ -49,11 +55,16 @@ def get_s3_object(client, bucket, key):
 def convert_s3_obj_to_df(s3_obj_dict):
     """Converts s3 object contents to panda dataframe
     
-    Keyword arguments:
-    - s3 object (dict): s3 object dictionary response
+    Positional arguments:
+    - s3_obj_dict (dict): s3 object dictionary response
     
     Returns:
     - Table formatted as panda dataframe
+    
+    Exceptions:
+    - KeyError: Key does not exist in dictionary
+    - TypeError: Type of input object is not a dictionary
+    - Exception: General error
     """
     try:
         data = s3_obj_dict["data"]
@@ -72,12 +83,15 @@ def convert_s3_obj_to_df(s3_obj_dict):
 def convert_df_to_s3_obj(client, df, bucket, key):
     """Converts panda dataframe to s3 parquet object
     
-    Keyword arguments:
+    Positional arguments:
     - client (boto3.client): s3 client
+    - df (panda df obj): The table in dataframe format
     - bucket (str): Name for the processed bucket
     - key (str): table file name
-    - df (panda df obj): The table in dataframe format
     
+    Exceptions:
+    - ClientError: Cannot connect to s3 client
+    - Exception: General error
     """
     try:
         output_buffer = BytesIO()
