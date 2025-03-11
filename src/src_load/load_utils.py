@@ -151,7 +151,8 @@ def load_tables_to_dw(conn, df, table_name, fact_tables):
         for row in df.reset_index().to_dict(orient="records"):
             conn.run(update_query, **row, table_name=table_name)
             count_row += 1
-        logger.info("loaded %s rows to dw", str(count_row))
+        logger.info("loaded %s rows to %s", str(count_row), table_name)
+        return count_row
     except Exception as err:
         logger.critical("Unable to load table, %s, to Data Warehouse, %s", table_name,  str(err))
 

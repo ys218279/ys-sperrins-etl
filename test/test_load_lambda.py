@@ -56,7 +56,7 @@ def test_load_lambda_successfully_loads_tables(mock_conn_dw,
         with caplog.at_level(logging.INFO):
             lambda_handler(lambda_event_2,context, BUCKET_NAME=bucket_name_processed)
             assert "dim_design loaded successfully" in caplog.text
-            assert "loaded 3 rows to dw" in caplog.text
+            assert "loaded 3 rows to dim_design" in caplog.text
 
 
 

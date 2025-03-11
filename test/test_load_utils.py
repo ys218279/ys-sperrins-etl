@@ -200,7 +200,7 @@ class TestLoadToDW:
         fact_table = []
         with caplog.at_level(logging.INFO):
             load_tables_to_dw(conn, df, 'table_name', fact_table)
-            assert "loaded 3 rows to dw" in caplog.text
+            assert "loaded 3 rows to table_name" in caplog.text
 
 
 class TestGetColumnNames:

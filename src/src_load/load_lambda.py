@@ -44,8 +44,9 @@ def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
         for table_name, s3_key in event.items():
             if s3_key:
                 df = pd_read_s3_parquet(s3_key, BUCKET_NAME, s3_client)
-                load_tables_to_dw(conn, df, table_name, fact_table)
-                logger.info("%s loaded successfully", table_name)
+                count = load_tables_to_dw(conn, df, table_name, fact_table)
+                if count:
+                    logger.info("%s loaded successfully", table_name)
     except Exception as e:
         logger.critical("Unexpected Exception: %s", str(e))
     finally:
