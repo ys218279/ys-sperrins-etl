@@ -65,6 +65,6 @@ def test_logging_for_lambda_handler(mock_get_s3_client, lambda_event, bucket_nam
     with mock_aws():
         mock_get_s3_client.side_effect = Exception("Something is wrong")
         context = DummyContext()
-        with caplog.at_level(logging.INFO):
+        with caplog.at_level(logging.CRITICAL):
             lambda_handler(lambda_event,context, BUCKET_NAME=bucket_name_processed)
             assert "Unexpected Exception" in caplog.text

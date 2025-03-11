@@ -47,7 +47,7 @@ def lambda_handler(event, context, BUCKET_NAME=BUCKET_NAME):
                 load_tables_to_dw(conn, df, table_name, fact_table)
                 logger.info("%s loaded successfully", table_name)
     except Exception as e:
-        logger.info("Unexpected Exception: %s", str(e))
+        logger.critical("Unexpected Exception: %s", str(e))
     finally:
         if conn:
             close_dw_connection(conn)

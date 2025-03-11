@@ -83,7 +83,7 @@ def lambda_handler(event,context):
         return output_event
     
     except Exception as e:
-        logger.info("Unexpected Exception: %s", str(e))
+        logger.critical("Unexpected Exception: %s", str(e))
         return output_event
 
 
