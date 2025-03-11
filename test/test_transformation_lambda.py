@@ -74,6 +74,6 @@ def test_handler_handles_unexpected_exception(mock_convert_s3,
     with mock_aws():
         mock_convert_s3.side_effect = TypeError
         context = DummyContext()
-        with caplog.at_level(logging.INFO):
+        with caplog.at_level(logging.CRITICAL):
             lambda_handler(lambda_event, context)
             assert "Unexpected Exception" in caplog.text
