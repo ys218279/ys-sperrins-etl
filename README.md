@@ -8,9 +8,10 @@ Terrific Totes is a fictional company that operates an OLTP database and a data 
   - **EventBridge Scheduler**: Triggers data ingestion every 5 minutes.
   - **Step Machine with JSON Payloads**: Orchestrates the workflow.
   - **Lambda Functions & Layers**: 
-    - One Python application ingests all tables from the `totesys` database.
+    - One Python application ingests all tables from the `totesys` database. Implements incremental refresh so that only new
+      and/or updated data is processed for optimisation of resources.
     - Another Python application remodels the data into a predefined schema and stores it in the "processed" S3 bucket in Parquet format.
-    - A third Python application loads the transformed data into a data warehouse, with new and updated data reflected in the target database within 30 minutes.
+    - A third Python application loads the transformed data into a data warehouse, with new and updated data reflected in the target database within 30 minutes. Fact tables retain a full history of how the data has evolved.
 - **CloudWatch Monitoring & SNS Alerts**
   - Logs errors, tracks performance, and sends critical failure notifications via SNS.
 - **Secure Data Management**
@@ -27,7 +28,7 @@ Terrific Totes is a fictional company that operates an OLTP database and a data 
 
 ## Tech Stack
 - **Infrastructure & CI/CD**: Terraform, GitHub Actions, Makefile
-- **Programming & Libraries**: Python, boto3, pandas, numpy, pg8000
+- **Programming & Libraries**: Python, boto3, pandas, numpy, pg8000, freezegun, coverage, bandit, black
 - **AWS Services**: CloudWatch, Lambda, EventBridge, Step Functions, SNS, S3, Secrets Manager
 - **Development Tools**: Visual Studio Code, Tableau
 
