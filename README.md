@@ -40,24 +40,25 @@ Terrific Totes is a fictional company that operates an OLTP database and a data 
    - Cloudwatch
    - Secrets Manager
    - SNS
-2. **Fork and Clone the Repository**  # Approx. 3.8 MiB memory needed to clone and set up the repository
+2. **Fork and Clone the Repository**  
+   *(Approx. 3.8 MiB memory needed to clone and set up the repository)*
    ```sh   
    git clone https://github.com/ys218279/team-09-sperrins.git
    cd team-09-sperrins
    ```
-3. **Set Up Databases**
+4. **Set Up Databases**
    - Create test source and target databases from the provided ERDs.
-4. **Install Terraform** (if not already installed)
-5. **Set Up Terraform Backend**
+5. **Install Terraform** (if not already installed)
+6. **Set Up Terraform Backend**
    - Create an S3 bucket to store Terraform state files.
-6. **Run Makefile Commands**
+7. **Run Makefile Commands**
    ```sh
    make all  # Creates virtual environment, installs dependencies, formats code, runs security and test coverage checks
    ```
-7. **Configure Sensitive Variables**
+8. **Configure Sensitive Variables**
    - Create a `sensitive.tfvars` file with database credentials and SNS email.
    - Store AWS credentials, database credentials, and SNS email in GitHub secrets.
-8. **Deploy Infrastructure**
+9. **Deploy Infrastructure**
    ```sh
    cd terraform
    terraform init
