@@ -24,7 +24,8 @@ Terrific Totes is a fictional company that operates an OLTP database and a data 
   - Python code is **PEP8 compliant**, thoroughly tested, and checked for security vulnerabilities using `pip-audit` and `bandit`.
 
 ## Architecture
-![Architecture Diagram](architecture.png)  
+![Architecture Diagram](architecture.png)
+![Architecture Diagram](ETL_architecture.png)   
 
 ## Tech Stack
 - **Infrastructure & CI/CD**: Terraform, GitHub Actions, Makefile
