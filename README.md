@@ -1,7 +1,7 @@
 # Data Pipeline Project - Terrific Totes
 
 ## Overview
-Terrific Totes, a fictional company, operates an OLTP database and a data warehouse used for reporting and visualizations. The goal of this project is to develop applications that Extract, Transform, and Load (ETL) data from the OLTP database into a data lake and warehouse hosted in AWS. This solution is reliable, resilient, and fully managed using Infrastructure-as-Code (Terraform, Python, GitHub Actions, and Makefile).
+Terrific Totes is a fictional company that operates an OLTP database and a data warehouse used for reporting and visualizations. The goal of this project is to develop applications that Extract, Transform, and Load (ETL) data from the OLTP database into a data lake and warehouse hosted in AWS. This solution is reliable, scalable, and fully managed using Infrastructure-as-Code (Terraform, Python, GitHub Actions, and Makefile).
 
 ## Features
 - **Automated Data Processing**
@@ -9,15 +9,15 @@ Terrific Totes, a fictional company, operates an OLTP database and a data wareho
   - **Step Machine with JSON Payloads**: Orchestrates the workflow.
   - **Lambda Functions & Layers**: 
     - One Python application ingests all tables from the `totesys` database.
-    - Another application remodels some data into a predefined schema and stores it in the "processed" S3 bucket in Parquet format.
-    - A third application loads the transformed data into a data warehouse at defined intervals.
+    - Another Python application remodels the data into a predefined schema and stores it in the "processed" S3 bucket in Parquet format.
+    - A third Python application loads the transformed data into a data warehouse, with new and updated data reflected in the target database within 30 minutes.
 - **CloudWatch Monitoring & SNS Alerts**
   - Logs errors, tracks performance, and sends critical failure notifications via SNS.
 - **Secure Data Management**
   - **IAM Policies**: Implements the principle of least privilege.
   - **Secrets Manager**: Manages database credentials securely.
 - **Data Storage in S3**
-  - **Raw Data Bucket**: Stores ingested data in its original form.
+  - **Raw Data Bucket**: Stores ingested data in its original form, acts as a data lake.
   - **Processed Data Bucket**: Holds transformed data in an immutable, well-structured format.
 - **Code Quality & Security**
   - Python code is **PEP8 compliant**, thoroughly tested, and checked for security vulnerabilities using `pip-audit` and `bandit`.
@@ -32,14 +32,21 @@ Terrific Totes, a fictional company, operates an OLTP database and a data wareho
 - **Development Tools**: Visual Studio Code, Tableau
 
 ## Installation & Setup
-1. **Create an AWS Account** and configure AWS credentials.
-2. **Fork and Clone the Repository**
-   ```sh
+1. **Create an AWS Account** and configure AWS credentials. 
+   The AWS user will need administrative privileges to set up the following:
+   - S3 Buckets
+   - Step Machine
+   - Lambda Functions
+   - Cloudwatch
+   - Secrets Manager
+   - SNS
+2. **Fork and Clone the Repository**  # Approx. 3.8 MiB memory needed to clone and set up the repository
+   ```sh   
    git clone https://github.com/ys218279/team-09-sperrins.git
    cd team-09-sperrins
    ```
 3. **Set Up Databases**
-   - Create source and target databases from the provided ERD.
+   - Create test source and target databases from the provided ERDs.
 4. **Install Terraform** (if not already installed)
 5. **Set Up Terraform Backend**
    - Create an S3 bucket to store Terraform state files.
@@ -52,6 +59,7 @@ Terrific Totes, a fictional company, operates an OLTP database and a data wareho
    - Store AWS credentials, database credentials, and SNS email in GitHub secrets.
 8. **Deploy Infrastructure**
    ```sh
+   cd terraform
    terraform init
    terraform plan -var-file=sensitive.tfvars
    terraform apply -var-file=sensitive.tfvars
@@ -61,27 +69,21 @@ Terrific Totes, a fictional company, operates an OLTP database and a data wareho
 ## Folder Structure
 ```
 /your-repo
-|-- data/                # Raw and processed data
-|-- src/                 # Source code for the pipeline
-|   |-- ingestion/       # Scripts for data extraction
-|   |-- processing/      # Data transformation scripts
-|   |-- storage/         # Data storage logic
-|-- logs/                # Logging output
-|-- config/              # Configuration files
-|-- tests/               # Unit and integration tests
-|-- requirements.txt     # Project dependencies
-|-- README.md            # Documentation
+|-- .github/workflows/      # Automation files
+|   |-- deploy.yml          # Script for CI/CD pipeline
+|-- .layer/python/          # Lambda dependency files
+|   |-- requirements.txt    # Lambda dependencies
+|-- src/                    # Source code for the pipeline
+|   |-- src_ingestion/      # Scripts for data extraction
+|   |-- src_transform/      # Scripts for data transformation
+|   |-- src_load/           # Scripts for data loading
+|-- logs/                   # Logging output
+|-- terraform/              # Terraform files
+|-- test/                   # Unit and integration tests
+|-- Makefile/               # Scripts for the env/installs/tests
+|-- requirements.txt        # Project dependencies
+|-- README.md               # Documentation
 ```
-
-## Contributing
-1. Fork the repository.
-2. Create a feature branch (`git checkout -b feature-name`).
-3. Commit your changes (`git commit -m 'Add feature'`).
-4. Push to the branch (`git push origin feature-name`).
-5. Open a pull request.
-
-## License
-This project is licensed under the [Your License] License. See `LICENSE` for details.
 
 ## Contact
 For any questions or issues, reach out via [GitHub Issues](https://github.com/ys218279/team-09-sperrins/issues).
