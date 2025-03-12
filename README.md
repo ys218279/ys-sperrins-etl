@@ -1,7 +1,7 @@
 # Data Pipeline Project - Terrific Totes
 
 ## Overview
-Terrific Totes is a fictional company that operates an OLTP database and a data warehouse used for reporting and visualizations. The goal of this project is to develop applications that Extract, Transform, and Load (ETL) data from the OLTP database into a data lake and warehouse hosted in AWS. This solution is reliable, scalable, and fully managed using Infrastructure-as-Code (Terraform, Python, GitHub Actions, and Makefile).
+Terrific Totes is a fictional company that operates an OLTP database and a data warehouse used for reporting and visualizations. The goal of this project is to develop applications that Extract, Transform, and Load (ETL) data from the OLTP database into a data lake and warehouse hosted in AWS. This solution is reliable, scalable, and fully managed using Infrastructure-as-Code.
 
 ## Features
 - **Automated Data Processing**
@@ -28,6 +28,7 @@ Terrific Totes is a fictional company that operates an OLTP database and a data 
 ![Architecture Diagram](ETL_architecture.png)   
 
 ## Tech Stack
+- **Version Control**: GitHub
 - **Infrastructure & CI/CD**: Terraform, GitHub Actions, Makefile
 - **Programming & Libraries**: Python, boto3, pandas, numpy, pg8000, freezegun, coverage, bandit, black
 - **AWS Services**: CloudWatch, Lambda, EventBridge, Step Functions, SNS, S3, Secrets Manager
@@ -56,6 +57,8 @@ Terrific Totes is a fictional company that operates an OLTP database and a data 
    ```
 4. **Set Up Databases**
    - Create test source and target databases from the provided ERDs.
+   - Source DB: https://dbdiagram.io/d/SampleDB-6332fecf7b3d2034ffcaaa92
+   - Target DB: https://dbdiagram.io/d/RevisedDW-63a19c5399cb1f3b55a27eca
 5. **Install Terraform** (if not already installed)
 6. **Set Up Terraform Backend**
    - Create an S3 bucket to store Terraform state files.
