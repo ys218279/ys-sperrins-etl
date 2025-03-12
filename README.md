@@ -41,7 +41,13 @@ Terrific Totes is a fictional company that operates an OLTP database and a data 
    - Cloudwatch
    - Secrets Manager
    - SNS
-2. **Fork and Clone the Repository**  
+2. **Ensure you have Python 3.12 installed**  
+   - Check your version:  
+     ```sh
+     python --version
+     ```  
+   - If needed, install it from [python.org](https://www.python.org/downloads/).
+3. **Fork and Clone the Repository**  
    *(Approx. 3.8 MiB memory needed to clone and set up the repository)*
    ```sh   
    git clone https://github.com/ys218279/team-09-sperrins.git
