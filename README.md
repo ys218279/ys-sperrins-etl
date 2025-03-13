@@ -60,6 +60,10 @@ Terrific Totes is a fictional company that operates an OLTP database and a data 
    - Source DB: https://dbdiagram.io/d/SampleDB-6332fecf7b3d2034ffcaaa92
    - Target DB: https://dbdiagram.io/d/RevisedDW-63a19c5399cb1f3b55a27eca
 5. **Install Terraform** (if not already installed)
+   ```sh
+   brew tap hashicorp/tap
+   brew install hashicorp/tap/terraform
+   ```
 6. **Set Up Terraform Backend**
    - Create an S3 bucket to store Terraform state files.
 7. **Run Makefile Commands**
@@ -80,11 +84,11 @@ Terrific Totes is a fictional company that operates an OLTP database and a data 
 
 ## Folder Structure
 ```
-/your-repo
+/team-09-sperrins
 |-- .github/workflows/      # Automation files
 |   |-- deploy.yml          # Script for CI/CD pipeline
-|-- .layer/python/          # Lambda dependency files
-|   |-- requirements.txt    # Lambda dependencies
+|-- .layer/python/          # Lambda layer dependency files
+|   |-- requirements.txt    # Lambda layer dependencies
 |-- src/                    # Source code for the pipeline
 |   |-- src_ingestion/      # Scripts for data extraction
 |   |-- src_transform/      # Scripts for data transformation
@@ -92,9 +96,13 @@ Terrific Totes is a fictional company that operates an OLTP database and a data 
 |-- logs/                   # Logging output
 |-- terraform/              # Terraform files
 |-- test/                   # Unit and integration tests
+|-- architecture.png        # Architecture diagram 
+|-- ETL_architecture.png    # ETL Architecture diagram 
+|-- mvp.png                 # Project brief diagram
 |-- Makefile/               # Scripts for the env/installs/tests
 |-- requirements.txt        # Project dependencies
-|-- README.md               # Documentation
+|-- README.md               # Documentation for final project
+|-- READMEBRIEF.md          # Documentation for project brief
 ```
 
 ## Contact
